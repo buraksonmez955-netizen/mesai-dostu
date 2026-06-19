@@ -11,14 +11,18 @@ export const Route = createFileRoute("/rapor")({
 });
 
 function ReportPage() {
-  const { entries } = useEntries();
-  const { settings } = useSettings();
+  const { entries, loaded: entriesLoaded } = useEntries();
+  const { settings, loaded: settingsLoaded } = useSettings();
+  const loaded = entriesLoaded && settingsLoaded;
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
 
-  const summary = summarizeMonth(entries, settings, year, month);
-  const rate = hourlyRate(settings);
+  const summary = useMemo(
+    () => summarizeMonth(entries, settings, year, month),
+    [entries, settings, year, month],
+  );
+  const rate = useMemo(() => hourlyRate(settings), [settings]);
 
   const change = (delta: number) => {
     const d = new Date(year, month + delta, 1);
