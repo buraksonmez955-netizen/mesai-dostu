@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TestRouteImport } from './routes/test'
 import { Route as TakvimRouteImport } from './routes/takvim'
 import { Route as RaporRouteImport } from './routes/rapor'
 import { Route as GunEkleRouteImport } from './routes/gun-ekle'
@@ -16,6 +17,11 @@ import { Route as GecmisRouteImport } from './routes/gecmis'
 import { Route as AyarlarRouteImport } from './routes/ayarlar'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TestRoute = TestRouteImport.update({
+  id: '/test',
+  path: '/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TakvimRoute = TakvimRouteImport.update({
   id: '/takvim',
   path: '/takvim',
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/gun-ekle': typeof GunEkleRoute
   '/rapor': typeof RaporRoute
   '/takvim': typeof TakvimRoute
+  '/test': typeof TestRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/gun-ekle': typeof GunEkleRoute
   '/rapor': typeof RaporRoute
   '/takvim': typeof TakvimRoute
+  '/test': typeof TestRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,12 +79,27 @@ export interface FileRoutesById {
   '/gun-ekle': typeof GunEkleRoute
   '/rapor': typeof RaporRoute
   '/takvim': typeof TakvimRoute
+  '/test': typeof TestRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/ayarlar' | '/gecmis' | '/gun-ekle' | '/rapor' | '/takvim'
+  fullPaths:
+    | '/'
+    | '/ayarlar'
+    | '/gecmis'
+    | '/gun-ekle'
+    | '/rapor'
+    | '/takvim'
+    | '/test'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ayarlar' | '/gecmis' | '/gun-ekle' | '/rapor' | '/takvim'
+  to:
+    | '/'
+    | '/ayarlar'
+    | '/gecmis'
+    | '/gun-ekle'
+    | '/rapor'
+    | '/takvim'
+    | '/test'
   id:
     | '__root__'
     | '/'
@@ -85,6 +108,7 @@ export interface FileRouteTypes {
     | '/gun-ekle'
     | '/rapor'
     | '/takvim'
+    | '/test'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -94,10 +118,18 @@ export interface RootRouteChildren {
   GunEkleRoute: typeof GunEkleRoute
   RaporRoute: typeof RaporRoute
   TakvimRoute: typeof TakvimRoute
+  TestRoute: typeof TestRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/test': {
+      id: '/test'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof TestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/takvim': {
       id: '/takvim'
       path: '/takvim'
@@ -150,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   GunEkleRoute: GunEkleRoute,
   RaporRoute: RaporRoute,
   TakvimRoute: TakvimRoute,
+  TestRoute: TestRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
