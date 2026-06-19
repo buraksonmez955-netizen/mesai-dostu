@@ -9,8 +9,26 @@ export type Settings = {
   holidayMultiplier: number;
 };
 
+export type DayStatus =
+  | "normal"
+  | "halfLeave"
+  | "fullLeave"
+  | "sick"
+  | "holiday"
+  | "weekendOff";
+
+export const DAY_STATUS_LABEL: Record<DayStatus, string> = {
+  normal: "Normal Çalışma",
+  halfLeave: "Yarım Gün İzin",
+  fullLeave: "Tam Gün İzin",
+  sick: "Raporlu",
+  holiday: "Resmi Tatil",
+  weekendOff: "Hafta Tatili",
+};
+
 export type DayEntry = {
   date: string; // YYYY-MM-DD
+  status: DayStatus;
   overtime50: number;
   overtime100: number;
   /** Resmi tatil mesaisi saati */
