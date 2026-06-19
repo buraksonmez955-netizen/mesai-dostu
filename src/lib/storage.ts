@@ -92,12 +92,16 @@ function readEntries(): DayEntry[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(ENTRIES_KEY);
-    if (raw) return migrateEntries(safeParse<DayEntry[]>(raw, []));
+    if (raw) {
+      const entries = migrateEntries(safeParse<unknown>(raw, {}));
+      window.localStorage.setItem(ENTRIES_KEY, JSON.stringify(entriesToRecord(entries)));
+      return entries;
+    }
     // Eski key'den göç
     const legacy = window.localStorage.getItem(LEGACY_ENTRIES_KEY);
     if (legacy) {
-      const migrated = migrateEntries(safeParse<DayEntry[]>(legacy, []));
-      window.localStorage.setItem(ENTRIES_KEY, JSON.stringify(migrated));
+      const migrated = migrateEntries(safeParse<unknown>(legacy, [])).map(legacyEntryToCurrent);
+      window.localStorage.setItem(ENTRIES_KEY, JSON.stringify(entriesToRecord(migrated)));
       return migrated;
     }
     return [];
@@ -190,23 +194,24 @@ export function useEntries() {
   const upsert = useCallback((entry: DayEntry) => {
     // Her zaman localStorage'dan oku — race condition'ı önle
     const current = readEntries();
-    const idx = current.findIndex((e) => e.date === entry.date);
+    const cleanEntry = normalizeEntry(entry);
+    const idx = current.findIndex((e) => e.date === cleanEntry.date);
     let next: DayEntry[];
     if (idx >= 0) {
       next = [...current];
-      next[idx] = entry;
+      next[idx] = cleanEntry;
     } else {
-      next = [...current, entry];
+      next = [...current, cleanEntry];
     }
     next.sort((a, b) => (a.date < b.date ? 1 : -1));
-    writeJSON(ENTRIES_KEY, next);
+    writeJSON(ENTRIES_KEY, entriesToRecord(next));
     setEntries(next);
   }, []);
 
   const remove = useCallback((date: string) => {
     const current = readEntries();
     const next = current.filter((e) => e.date !== date);
-    writeJSON(ENTRIES_KEY, next);
+    writeJSON(ENTRIES_KEY, entriesToRecord(next));
     setEntries(next);
   }, []);
 
