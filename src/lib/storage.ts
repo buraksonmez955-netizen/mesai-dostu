@@ -15,6 +15,21 @@ type StoredEntries = Record<
   Partial<Omit<DayEntry, "date">> & { date?: string; overtimeType?: "50" | "100" | "holiday"; overtimeHours?: number }
 >;
 
+function toNumber(value: unknown, fallback = 0): number {
+  const parsed = typeof value === "string" ? Number(value.replace(",", ".")) : Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function normalizeSettings(value: Partial<Settings>): Settings {
+  return {
+    netSalary: toNumber(value.netSalary, defaultSettings.netSalary),
+    weeklyHours: toNumber(value.weeklyHours, defaultSettings.weeklyHours),
+    dailyHours: toNumber(value.dailyHours, defaultSettings.dailyHours),
+    monthlyHours: toNumber(value.monthlyHours, defaultSettings.monthlyHours),
+    holidayMultiplier: toNumber(value.holidayMultiplier, defaultSettings.holidayMultiplier),
+  };
+}
+
 function inferStatus(e: DayEntry): DayStatus {
   if (getHoliday(e.date)) return "holiday";
   const [y, m, d] = e.date.split("-").map(Number);
@@ -26,12 +41,12 @@ function inferStatus(e: DayEntry): DayStatus {
 function normalizeEntry(
   entry: Partial<DayEntry> & { date: string; overtimeType?: "50" | "100" | "holiday"; overtimeHours?: number },
 ): DayEntry {
-  const legacyOvertimeHours = Number(entry.overtimeHours) || 0;
-  const overtime50 = Number(entry.overtime50) || (entry.overtimeType === "50" ? legacyOvertimeHours : 0);
-  const overtime100 = Number(entry.overtime100) || (entry.overtimeType === "100" ? legacyOvertimeHours : 0);
-  const overtimeHoliday = Number(entry.overtimeHoliday) || (entry.overtimeType === "holiday" ? legacyOvertimeHours : 0);
-  const lateHours = Number(entry.lateHours) || 0;
-  const leaveHours = Number(entry.leaveHours) || 0;
+  const legacyOvertimeHours = toNumber(entry.overtimeHours);
+  const overtime50 = toNumber(entry.overtime50) || (entry.overtimeType === "50" ? legacyOvertimeHours : 0);
+  const overtime100 = toNumber(entry.overtime100) || (entry.overtimeType === "100" ? legacyOvertimeHours : 0);
+  const overtimeHoliday = toNumber(entry.overtimeHoliday) || (entry.overtimeType === "holiday" ? legacyOvertimeHours : 0);
+  const lateHours = toNumber(entry.lateHours);
+  const leaveHours = toNumber(entry.leaveHours);
 
   return {
     date: entry.date,
