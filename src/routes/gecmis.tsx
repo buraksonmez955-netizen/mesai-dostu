@@ -1,9 +1,35 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppLayout } from "@/components/AppLayout";
 import { useEntries, useSettings } from "@/lib/storage";
-import { formatHours, formatTRY, holidayMultiplier, hourlyRate, MONTHS_TR, parseYMD } from "@/lib/mesai";
+import {
+  DAY_STATUS_LABEL,
+  formatHours,
+  formatTRY,
+  holidayMultiplier,
+  hourlyRate,
+  MONTHS_TR,
+  parseYMD,
+  type DayStatus,
+} from "@/lib/mesai";
 import { useMemo } from "react";
-import { ChevronRight } from "lucide-react";
+import {
+  Briefcase,
+  ChevronRight,
+  Coffee,
+  MinusCircle,
+  Sparkles,
+  Stethoscope,
+  Sun,
+} from "lucide-react";
+
+const STATUS_ICON: Record<DayStatus, { Icon: typeof Briefcase; tone: string }> = {
+  normal: { Icon: Briefcase, tone: "text-success" },
+  halfLeave: { Icon: MinusCircle, tone: "text-warning" },
+  fullLeave: { Icon: Sun, tone: "text-warning" },
+  sick: { Icon: Stethoscope, tone: "text-info" },
+  holiday: { Icon: Sparkles, tone: "text-status-holiday" },
+  weekendOff: { Icon: Coffee, tone: "text-muted-foreground" },
+};
 
 export const Route = createFileRoute("/gecmis")({
   head: () => ({ meta: [{ title: "Geçmiş Kayıtlar — Mesai Defteri" }] }),
@@ -65,28 +91,41 @@ function HistoryPage() {
                   rate * hMult * (e.overtimeHoliday || 0);
                 const ded = rate * (e.lateHours + e.leaveHours);
                 const net = otEarn - ded;
+                const meta = STATUS_ICON[e.status];
+                const Icon = meta.Icon;
                 return (
                   <li key={e.date}>
                     <button
                       onClick={() => navigate({ to: "/gun-ekle", search: { date: e.date } })}
                       className="card-gradient flex w-full items-center justify-between rounded-xl p-3 text-left transition active:scale-[0.99]"
                     >
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold">
-                          {d.toLocaleDateString("tr-TR", {
-                            day: "2-digit",
-                            month: "short",
-                            weekday: "short",
-                          })}
-                        </p>
-                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                          {e.overtime50 > 0 && `%50 ${formatHours(e.overtime50)} `}
-                          {e.overtime100 > 0 && `%100 ${formatHours(e.overtime100)} `}
-                          {(e.overtimeHoliday || 0) > 0 && `Tatil ${formatHours(e.overtimeHoliday)} `}
-                          {e.lateHours > 0 && `Geç ${formatHours(e.lateHours)} `}
-                          {e.leaveHours > 0 && `İzin ${formatHours(e.leaveHours)}`}
-                          {e.note && ` • ${e.note}`}
-                        </p>
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted ${meta.tone}`}
+                          title={DAY_STATUS_LABEL[e.status]}
+                        >
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold">
+                            {d.toLocaleDateString("tr-TR", {
+                              day: "2-digit",
+                              month: "short",
+                              weekday: "short",
+                            })}
+                            <span className="ml-2 text-xs font-normal text-muted-foreground">
+                              {DAY_STATUS_LABEL[e.status]}
+                            </span>
+                          </p>
+                          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                            {e.overtime50 > 0 && `%50 ${formatHours(e.overtime50)} `}
+                            {e.overtime100 > 0 && `%100 ${formatHours(e.overtime100)} `}
+                            {(e.overtimeHoliday || 0) > 0 && `Tatil ${formatHours(e.overtimeHoliday)} `}
+                            {e.lateHours > 0 && `Geç ${formatHours(e.lateHours)} `}
+                            {e.leaveHours > 0 && `İzin ${formatHours(e.leaveHours)}`}
+                            {e.note && ` • ${e.note}`}
+                          </p>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className={`text-sm font-semibold ${net >= 0 ? "text-success" : "text-destructive"}`}>

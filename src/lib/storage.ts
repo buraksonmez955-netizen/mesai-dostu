@@ -1,8 +1,25 @@
 import { useEffect, useState, useCallback } from "react";
-import { defaultSettings, type DayEntry, type Settings } from "./mesai";
+import { defaultSettings, type DayEntry, type DayStatus, type Settings } from "./mesai";
+import { getHoliday } from "./holidays";
 
 const SETTINGS_KEY = "mesai.settings.v1";
 const ENTRIES_KEY = "mesai.entries.v1";
+
+function inferStatus(e: DayEntry): DayStatus {
+  if (getHoliday(e.date)) return "holiday";
+  const [y, m, d] = e.date.split("-").map(Number);
+  const day = new Date(y, m - 1, d).getDay();
+  if (day === 0 || day === 6) return "weekendOff";
+  return "normal";
+}
+
+function migrateEntries(list: DayEntry[]): DayEntry[] {
+  return list.map((e) => ({
+    ...e,
+    overtimeHoliday: e.overtimeHoliday ?? 0,
+    status: (e.status as DayStatus) ?? inferStatus(e),
+  }));
+}
 
 function readLS<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -55,12 +72,12 @@ export function useEntries() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setEntries(readLS<DayEntry[]>(ENTRIES_KEY, []));
+    setEntries(migrateEntries(readLS<DayEntry[]>(ENTRIES_KEY, [])));
     setLoaded(true);
     const onUpdate = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail?.key === ENTRIES_KEY) {
-        setEntries(readLS<DayEntry[]>(ENTRIES_KEY, []));
+        setEntries(migrateEntries(readLS<DayEntry[]>(ENTRIES_KEY, [])));
       }
     };
     window.addEventListener("mesai:update", onUpdate);

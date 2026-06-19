@@ -35,6 +35,8 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --color-status-holiday: var(--status-holiday);
+  --color-status-holiday-foreground: var(--status-holiday-foreground);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -76,6 +78,9 @@
 
   --info: oklch(0.6 0.13 240);
   --info-foreground: oklch(0.99 0.01 0);
+
+  --status-holiday: oklch(0.55 0.18 305);
+  --status-holiday-foreground: oklch(0.99 0.01 0);
 
   --border: oklch(0.9 0.015 200);
   --input: oklch(0.93 0.012 200);
