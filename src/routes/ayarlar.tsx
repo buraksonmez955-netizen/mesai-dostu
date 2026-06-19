@@ -22,12 +22,14 @@ function SettingsPage() {
   const [netSalary, setNetSalary] = useState("");
   const [weeklyHours, setWeeklyHours] = useState("");
   const [dailyHours, setDailyHours] = useState("");
+  const [monthlyHoursStr, setMonthlyHoursStr] = useState("");
 
   useEffect(() => {
     if (loaded) {
       setNetSalary(settings.netSalary ? String(settings.netSalary) : "");
       setWeeklyHours(String(settings.weeklyHours));
       setDailyHours(String(settings.dailyHours));
+      setMonthlyHoursStr(String(settings.monthlyHours || 225));
     }
   }, [loaded, settings]);
 
@@ -35,6 +37,7 @@ function SettingsPage() {
     netSalary: Number(netSalary.replace(",", ".")) || 0,
     weeklyHours: Number(weeklyHours.replace(",", ".")) || 45,
     dailyHours: Number(dailyHours.replace(",", ".")) || 9,
+    monthlyHours: Number(monthlyHoursStr.replace(",", ".")) || 225,
   };
   const rate = hourlyRate(parsed);
 
@@ -88,6 +91,21 @@ function SettingsPage() {
             onChange={(e) => setDailyHours(e.target.value)}
             className="mt-2 h-12 text-lg"
           />
+        </div>
+
+        <div className="card-gradient rounded-2xl p-5">
+          <Label htmlFor="monthly" className="text-sm font-medium">Aylık Çalışma Saati</Label>
+          <Input
+            id="monthly"
+            inputMode="decimal"
+            placeholder="225"
+            value={monthlyHoursStr}
+            onChange={(e) => setMonthlyHoursStr(e.target.value)}
+            className="mt-2 h-12 text-lg"
+          />
+          <p className="mt-2 text-xs text-muted-foreground">
+            Saatlik ücret bu değere göre hesaplanır. Varsayılan: 225 saat.
+          </p>
         </div>
 
         <div className="primary-gradient rounded-2xl p-5">
