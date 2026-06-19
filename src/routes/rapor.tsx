@@ -32,6 +32,11 @@ function ReportPage() {
 
   return (
     <AppLayout title="Aylık Rapor">
+      {!loaded && (
+        <div className="mb-4 card-gradient rounded-2xl p-4 text-center text-sm text-muted-foreground">
+          Kayıtlar yükleniyor...
+        </div>
+      )}
       <div className="mb-4 flex items-center justify-between rounded-xl bg-card p-2 shadow-[var(--shadow-card)]">
         <button onClick={() => change(-1)} className="rounded-lg p-2 hover:bg-muted">
           <ChevronLeft className="h-5 w-5" />
