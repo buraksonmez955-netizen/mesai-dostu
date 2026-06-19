@@ -2,6 +2,7 @@ export type Settings = {
   netSalary: number;
   weeklyHours: number;
   dailyHours: number;
+  monthlyHours: number;
 };
 
 export type DayEntry = {
@@ -17,11 +18,11 @@ export const defaultSettings: Settings = {
   netSalary: 0,
   weeklyHours: 45,
   dailyHours: 9,
+  monthlyHours: 225,
 };
 
 export function monthlyHours(s: Settings): number {
-  // Türkiye standart: haftalık saat * 4.33
-  return Math.max(1, s.weeklyHours * 4.33);
+  return Math.max(1, s.monthlyHours || 225);
 }
 
 export function hourlyRate(s: Settings): number {
