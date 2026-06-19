@@ -110,7 +110,7 @@ function safeParse<T>(raw: string | null, fallback: T): T {
   }
 }
 
-/** Kayıtları oku — yeni key yoksa eski key'den göç et. */
+/** Kayıtları oku — yeni key yoksa eski key'den göç et. Mevcut veriyi DEĞİŞTİRMEZ. */
 function readEntries(): DayEntry[] {
   if (typeof window === "undefined") return [];
   try {
@@ -118,11 +118,9 @@ function readEntries(): DayEntry[] {
     if (raw) {
       const parsed = safeParse<unknown>(raw, null);
       if (parsed === null) return [];
-      const entries = migrateEntries(parsed);
-      window.localStorage.setItem(ENTRIES_KEY, JSON.stringify(entriesToRecord(entries)));
-      return entries;
+      return migrateEntries(parsed);
     }
-    // Eski key'den göç
+    // Eski key'den bir kerelik göç
     const legacy = window.localStorage.getItem(LEGACY_ENTRIES_KEY);
     if (legacy) {
       const migrated = migrateEntries(safeParse<unknown>(legacy, [])).map(legacyEntryToCurrent);
@@ -152,11 +150,21 @@ function readSettings(): Settings {
   }
 }
 
-function writeJSON(key: string, value: unknown) {
+function writeEntries(list: DayEntry[]) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
-    window.dispatchEvent(new CustomEvent("mesai:update", { detail: { key } }));
+    window.localStorage.setItem(ENTRIES_KEY, JSON.stringify(entriesToRecord(list)));
+    window.dispatchEvent(new CustomEvent("mesai:update", { detail: { key: ENTRIES_KEY } }));
+  } catch {
+    /* noop */
+  }
+}
+
+function writeSettings(s: Settings) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+    window.dispatchEvent(new CustomEvent("mesai:update", { detail: { key: SETTINGS_KEY } }));
   } catch {
     /* noop */
   }
@@ -186,7 +194,7 @@ export function useSettings() {
 
   const save = useCallback((s: Settings) => {
     const next = normalizeSettings(s);
-    writeJSON(SETTINGS_KEY, next);
+    writeSettings(next);
     setSettings(next);
   }, []);
 
@@ -217,42 +225,27 @@ export function useEntries() {
     };
   }, []);
 
-  const upsert = useCallback((entry: DayEntry) => {
-    // Her zaman localStorage'dan oku — race condition'ı önle
-    const current = readEntries();
+  const upsert = useCallback((entry: Partial<DayEntry> & { date: string }) => {
+    if (!entry.date) return;
     const cleanEntry = normalizeEntry(entry);
-    if (current.length === 0 && typeof window !== "undefined" && window.localStorage.getItem(ENTRIES_KEY)) {
-      const raw = window.localStorage.getItem(ENTRIES_KEY);
-      if (raw && safeParse<unknown>(raw, null) === null) {
-        setEntries((prev) => {
-          const next = [...prev.filter((e) => e.date !== cleanEntry.date), cleanEntry].sort((a, b) =>
-            a.date < b.date ? 1 : -1,
-          );
-          writeJSON(ENTRIES_KEY, entriesToRecord(next));
-          return next;
-        });
-        return;
-      }
-    }
+    // Her zaman localStorage'dan en güncel listeyi oku
+    const current = readEntries();
     const idx = current.findIndex((e) => e.date === cleanEntry.date);
-    let next: DayEntry[];
-    if (idx >= 0) {
-      next = [...current];
-      next[idx] = cleanEntry;
-    } else {
-      next = [...current, cleanEntry];
-    }
+    const next = idx >= 0
+      ? current.map((e, i) => (i === idx ? cleanEntry : e))
+      : [...current, cleanEntry];
     next.sort((a, b) => (a.date < b.date ? 1 : -1));
-    writeJSON(ENTRIES_KEY, entriesToRecord(next));
+    writeEntries(next);
     setEntries(next);
   }, []);
 
   const remove = useCallback((date: string) => {
     const current = readEntries();
     const next = current.filter((e) => e.date !== date);
-    writeJSON(ENTRIES_KEY, entriesToRecord(next));
+    writeEntries(next);
     setEntries(next);
   }, []);
 
   return { entries, upsert, remove, loaded };
 }
+
