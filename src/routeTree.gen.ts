@@ -9,8 +9,38 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TakvimRouteImport } from './routes/takvim'
+import { Route as RaporRouteImport } from './routes/rapor'
+import { Route as GunEkleRouteImport } from './routes/gun-ekle'
+import { Route as GecmisRouteImport } from './routes/gecmis'
+import { Route as AyarlarRouteImport } from './routes/ayarlar'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TakvimRoute = TakvimRouteImport.update({
+  id: '/takvim',
+  path: '/takvim',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RaporRoute = RaporRouteImport.update({
+  id: '/rapor',
+  path: '/rapor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GunEkleRoute = GunEkleRouteImport.update({
+  id: '/gun-ekle',
+  path: '/gun-ekle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GecmisRoute = GecmisRouteImport.update({
+  id: '/gecmis',
+  path: '/gecmis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AyarlarRoute = AyarlarRouteImport.update({
+  id: '/ayarlar',
+  path: '/ayarlar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +49,90 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ayarlar': typeof AyarlarRoute
+  '/gecmis': typeof GecmisRoute
+  '/gun-ekle': typeof GunEkleRoute
+  '/rapor': typeof RaporRoute
+  '/takvim': typeof TakvimRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ayarlar': typeof AyarlarRoute
+  '/gecmis': typeof GecmisRoute
+  '/gun-ekle': typeof GunEkleRoute
+  '/rapor': typeof RaporRoute
+  '/takvim': typeof TakvimRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ayarlar': typeof AyarlarRoute
+  '/gecmis': typeof GecmisRoute
+  '/gun-ekle': typeof GunEkleRoute
+  '/rapor': typeof RaporRoute
+  '/takvim': typeof TakvimRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/ayarlar' | '/gecmis' | '/gun-ekle' | '/rapor' | '/takvim'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/ayarlar' | '/gecmis' | '/gun-ekle' | '/rapor' | '/takvim'
+  id:
+    | '__root__'
+    | '/'
+    | '/ayarlar'
+    | '/gecmis'
+    | '/gun-ekle'
+    | '/rapor'
+    | '/takvim'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AyarlarRoute: typeof AyarlarRoute
+  GecmisRoute: typeof GecmisRoute
+  GunEkleRoute: typeof GunEkleRoute
+  RaporRoute: typeof RaporRoute
+  TakvimRoute: typeof TakvimRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/takvim': {
+      id: '/takvim'
+      path: '/takvim'
+      fullPath: '/takvim'
+      preLoaderRoute: typeof TakvimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rapor': {
+      id: '/rapor'
+      path: '/rapor'
+      fullPath: '/rapor'
+      preLoaderRoute: typeof RaporRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gun-ekle': {
+      id: '/gun-ekle'
+      path: '/gun-ekle'
+      fullPath: '/gun-ekle'
+      preLoaderRoute: typeof GunEkleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gecmis': {
+      id: '/gecmis'
+      path: '/gecmis'
+      fullPath: '/gecmis'
+      preLoaderRoute: typeof GecmisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ayarlar': {
+      id: '/ayarlar'
+      path: '/ayarlar'
+      fullPath: '/ayarlar'
+      preLoaderRoute: typeof AyarlarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +145,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AyarlarRoute: AyarlarRoute,
+  GecmisRoute: GecmisRoute,
+  GunEkleRoute: GunEkleRoute,
+  RaporRoute: RaporRoute,
+  TakvimRoute: TakvimRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

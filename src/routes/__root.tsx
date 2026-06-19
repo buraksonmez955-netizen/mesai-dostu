@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -77,11 +78,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Mesai Defteri — Maaş ve Mesai Hesaplama" },
+      { name: "description", content: "Aylık maaşını ve mesai bilgilerini gir, fazla mesai ve kesintilerle birlikte ay sonu net kazancını hesapla." },
+      { name: "author", content: "Mesai Defteri" },
+      { property: "og:title", content: "Mesai Defteri — Maaş ve Mesai Hesaplama" },
+      { property: "og:description", content: "Mesai, geç kalma ve izinleri takip ederek aylık net kazancınızı kolayca hesaplayın." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
@@ -120,6 +121,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <Toaster position="top-center" richColors />
     </QueryClientProvider>
   );
 }
