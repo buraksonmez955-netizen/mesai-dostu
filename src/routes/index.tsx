@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { useEntries, useSettings } from "@/lib/storage";
 import { formatTRY, hourlyRate, summarizeMonth, MONTHS_TR, formatHours } from "@/lib/mesai";
