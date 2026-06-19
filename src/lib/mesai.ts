@@ -46,13 +46,16 @@ export const defaultSettings: Settings = {
   holidayMultiplier: 2,
 };
 
-export function monthlyHours(s: Settings): number {
-  return Math.max(1, s.monthlyHours || 225);
+/** Saatlik ücret hesabında kullanılan sabit aylık çalışma saati. */
+export const MONTHLY_HOURS_DIVISOR = 225;
+
+export function monthlyHours(_s: Settings): number {
+  return MONTHLY_HOURS_DIVISOR;
 }
 
 export function hourlyRate(s: Settings): number {
   if (!s.netSalary || s.netSalary <= 0) return 0;
-  return s.netSalary / monthlyHours(s);
+  return s.netSalary / MONTHLY_HOURS_DIVISOR;
 }
 
 export function holidayMultiplier(s: Settings): number {
