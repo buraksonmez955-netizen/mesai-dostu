@@ -10,7 +10,10 @@ const ENTRIES_KEY = "mesaiDefteriRecords";
 const LEGACY_SETTINGS_KEY = "mesai.settings.v1";
 const LEGACY_ENTRIES_KEY = "mesai.entries.v1";
 
-type StoredEntries = Record<string, Partial<Omit<DayEntry, "date">> & { date?: string }>;
+type StoredEntries = Record<
+  string,
+  Partial<Omit<DayEntry, "date">> & { date?: string; overtimeType?: "50" | "100" | "holiday"; overtimeHours?: number }
+>;
 
 function inferStatus(e: DayEntry): DayStatus {
   if (getHoliday(e.date)) return "holiday";
@@ -20,10 +23,13 @@ function inferStatus(e: DayEntry): DayStatus {
   return "normal";
 }
 
-function normalizeEntry(entry: Partial<DayEntry> & { date: string }): DayEntry {
-  const overtime50 = Number(entry.overtime50) || 0;
-  const overtime100 = Number(entry.overtime100) || 0;
-  const overtimeHoliday = Number(entry.overtimeHoliday) || 0;
+function normalizeEntry(
+  entry: Partial<DayEntry> & { date: string; overtimeType?: "50" | "100" | "holiday"; overtimeHours?: number },
+): DayEntry {
+  const legacyOvertimeHours = Number(entry.overtimeHours) || 0;
+  const overtime50 = Number(entry.overtime50) || (entry.overtimeType === "50" ? legacyOvertimeHours : 0);
+  const overtime100 = Number(entry.overtime100) || (entry.overtimeType === "100" ? legacyOvertimeHours : 0);
+  const overtimeHoliday = Number(entry.overtimeHoliday) || (entry.overtimeType === "holiday" ? legacyOvertimeHours : 0);
   const lateHours = Number(entry.lateHours) || 0;
   const leaveHours = Number(entry.leaveHours) || 0;
 
@@ -55,7 +61,9 @@ function recordToEntries(record: StoredEntries): DayEntry[] {
 
 function migrateEntries(value: unknown): DayEntry[] {
   if (Array.isArray(value)) {
-    return value.map((e) => normalizeEntry(e)).sort((a, b) => (a.date < b.date ? 1 : -1));
+    return value
+      .map((e) => normalizeEntry(e as Partial<DayEntry> & { date: string }))
+      .sort((a, b) => (a.date < b.date ? 1 : -1));
   }
 
   if (value && typeof value === "object") {
