@@ -183,10 +183,12 @@ function DayAddPage() {
 
   const holidayPct = Math.round((hMult - 1) * 100);
 
+  const normalizeDecimal = (v: string) => v.replace(",", ".");
+
   return (
     <AppLayout title="Günlük Kayıt">
       <div className="space-y-4">
-        <div className="card-gradient rounded-2xl p-5">
+        <div className="card-gradient rounded-[20px] p-5">
           <Label htmlFor="date">Tarih</Label>
           <Input
             id="date"
@@ -199,7 +201,7 @@ function DayAddPage() {
         </div>
 
         {holiday && (
-          <div className="flex items-start gap-2 rounded-2xl border-2 border-status-holiday/40 bg-status-holiday/5 p-4">
+          <div className="flex items-start gap-2 rounded-[20px] border-2 border-status-holiday/40 bg-status-holiday/5 p-5">
             <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-status-holiday" />
             <div>
               <p className="text-sm font-semibold text-status-holiday">Bugün Resmi Tatil</p>
@@ -208,9 +210,9 @@ function DayAddPage() {
           </div>
         )}
 
-        <div className="card-gradient rounded-2xl p-5">
-          <Label className="mb-2 block">Gün Durumu</Label>
-          <div className="grid grid-cols-2 gap-2">
+        <div className="card-gradient rounded-[20px] p-5">
+          <Label className="mb-3 block">Gün Durumu</Label>
+          <div className="grid grid-cols-2 gap-3">
             {STATUS_ORDER.map((s) => {
               const meta = STATUS_META[s];
               const Icon = meta.icon;
@@ -220,13 +222,16 @@ function DayAddPage() {
                   key={s}
                   type="button"
                   onClick={() => setStatus(s)}
-                  className={`flex items-center gap-2 rounded-xl border p-3 text-left text-sm font-medium transition ${
+                  className={`flex h-12 items-center gap-2 rounded-xl border px-3 text-left text-sm font-medium transition ${
                     active
-                      ? `${meta.border} ${meta.bg} ${meta.tone}`
-                      : "border-border text-muted-foreground"
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background text-muted-foreground"
                   }`}
                 >
-                  <Icon className="h-4 w-4 shrink-0" />
+                  <Icon
+                    className={`shrink-0 ${active ? "text-primary-foreground" : meta.tone}`}
+                    style={{ width: 22, height: 22 }}
+                  />
                   <span className="truncate">{DAY_STATUS_LABEL[s]}</span>
                 </button>
               );
@@ -235,15 +240,15 @@ function DayAddPage() {
         </div>
 
         {!otAllowed ? (
-          <div className="rounded-2xl border border-border bg-muted/40 p-4 text-center text-sm text-muted-foreground">
+          <div className="rounded-[20px] border border-border bg-muted/40 p-5 text-center text-sm text-muted-foreground">
             {status === "fullLeave"
               ? "Tam gün izinli olduğunuz için bu güne mesai veya kesinti eklenemez."
               : "Raporlu gün — mesai veya kesinti eklenemez."}
           </div>
         ) : (
           <>
-            <div className="card-gradient rounded-2xl p-5">
-              <Label className="mb-2 block">
+            <div className="card-gradient rounded-[20px] pt-6 pb-6 px-5">
+              <Label className="mb-4 block">
                 Fazla Mesai
                 {status === "weekendOff" && (
                   <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -252,78 +257,81 @@ function DayAddPage() {
                 )}
               </Label>
               {status === "holiday" ? (
-                <div className="mb-3 rounded-xl border border-status-holiday bg-status-holiday/10 p-3 text-sm text-status-holiday">
+                <div className="mb-5 rounded-xl border border-status-holiday bg-status-holiday/10 p-3 text-sm text-status-holiday">
                   Resmi Tatil Mesaisi — x {hMult} (%{holidayPct})
                 </div>
               ) : (
-                <div className="mb-3 grid grid-cols-2 gap-2">
+                <div className="mb-5 grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => setOtType("50")}
-                    className={`rounded-xl border p-3 text-sm font-medium transition ${
+                    className={`h-14 rounded-xl border text-sm font-medium transition ${
                       otType === "50"
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground"
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-muted-foreground"
                     }`}
                   >
                     %50
-                    <div className="text-[10px] opacity-75">x 1.5</div>
+                    <div className="text-[10px] opacity-80">x 1.5</div>
                   </button>
                   <button
                     type="button"
                     onClick={() => setOtType("100")}
-                    className={`rounded-xl border p-3 text-sm font-medium transition ${
+                    className={`h-14 rounded-xl border text-sm font-medium transition ${
                       otType === "100"
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground"
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-muted-foreground"
                     }`}
                   >
                     %100
-                    <div className="text-[10px] opacity-75">x 2</div>
+                    <div className="text-[10px] opacity-80">x 2</div>
                   </button>
                 </div>
               )}
               <Input
                 inputMode="decimal"
-                placeholder="Saat (örn. 2.5)"
+                pattern="[0-9.,]*"
+                placeholder="Mesai Saati (örn: 2.5)"
                 value={otHours}
-                onChange={(e) => setOtHours(e.target.value)}
+                onChange={(e) => setOtHours(normalizeDecimal(e.target.value))}
                 className="h-12"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="card-gradient rounded-2xl p-4">
+              <div className="card-gradient rounded-[20px] p-5">
                 <Label htmlFor="late" className="text-xs">
                   Geç Kalma (sa)
                 </Label>
                 <Input
                   id="late"
                   inputMode="decimal"
+                  pattern="[0-9.,]*"
                   placeholder="0"
                   value={lateHours}
-                  onChange={(e) => setLateHours(e.target.value)}
-                  className="mt-2 h-11"
+                  onChange={(e) => setLateHours(normalizeDecimal(e.target.value))}
+                  className="mt-2 h-12"
                 />
               </div>
-              <div className="card-gradient rounded-2xl p-4">
+              <div className="card-gradient rounded-[20px] p-5">
                 <Label htmlFor="leave" className="text-xs">
                   Ücretsiz İzin (sa)
                 </Label>
                 <Input
                   id="leave"
                   inputMode="decimal"
+                  pattern="[0-9.,]*"
                   placeholder="0"
                   value={leaveHours}
-                  onChange={(e) => setLeaveHours(e.target.value)}
-                  className="mt-2 h-11"
+                  onChange={(e) => setLeaveHours(normalizeDecimal(e.target.value))}
+                  className="mt-2 h-12"
                 />
               </div>
             </div>
           </>
         )}
 
-        <div className="card-gradient rounded-2xl p-5">
+        <div className="card-gradient rounded-[20px] p-5">
           <Label htmlFor="note">Açıklama / Not</Label>
           <Textarea
             id="note"
@@ -334,7 +342,7 @@ function DayAddPage() {
           />
         </div>
 
-        <div className="primary-gradient rounded-2xl p-5">
+        <div className="primary-gradient rounded-[20px] p-5">
           <p className="text-xs uppercase tracking-widest opacity-80">Bu Günün Net Etkisi</p>
           <p className="mt-1 text-2xl font-bold">
             {dayNet >= 0 ? "+" : ""}
