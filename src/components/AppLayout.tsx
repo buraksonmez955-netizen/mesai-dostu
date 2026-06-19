@@ -37,11 +37,12 @@ export function AppLayout({ title, children, action }: { title: string; children
         <div className="mx-auto flex max-w-md items-end justify-between px-2 py-2">
           {nav.map(({ to, label, icon: Icon, highlight }) => {
             const active = pathname === to;
+            const toAny = to as never;
             if (highlight) {
               return (
                 <Link
                   key={to}
-                  to={to}
+                  to={toAny}
                   className="primary-gradient -mt-6 flex h-14 w-14 flex-col items-center justify-center rounded-full shadow-[var(--shadow-elevated)] transition active:scale-95"
                 >
                   <Icon className="h-6 w-6" />
@@ -51,7 +52,7 @@ export function AppLayout({ title, children, action }: { title: string; children
             return (
               <Link
                 key={to}
-                to={to}
+                to={toAny}
                 className={`flex flex-1 flex-col items-center gap-0.5 rounded-lg px-2 py-1.5 text-[11px] transition ${
                   active ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
