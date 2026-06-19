@@ -22,12 +22,14 @@ function SettingsPage() {
   const [netSalary, setNetSalary] = useState("");
   const [weeklyHours, setWeeklyHours] = useState("");
   const [dailyHours, setDailyHours] = useState("");
+  const [monthlyHoursStr, setMonthlyHoursStr] = useState("");
 
   useEffect(() => {
     if (loaded) {
       setNetSalary(settings.netSalary ? String(settings.netSalary) : "");
       setWeeklyHours(String(settings.weeklyHours));
       setDailyHours(String(settings.dailyHours));
+      setMonthlyHoursStr(String(settings.monthlyHours || 225));
     }
   }, [loaded, settings]);
 
@@ -35,6 +37,7 @@ function SettingsPage() {
     netSalary: Number(netSalary.replace(",", ".")) || 0,
     weeklyHours: Number(weeklyHours.replace(",", ".")) || 45,
     dailyHours: Number(dailyHours.replace(",", ".")) || 9,
+    monthlyHours: Number(monthlyHoursStr.replace(",", ".")) || 225,
   };
   const rate = hourlyRate(parsed);
 
