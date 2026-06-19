@@ -18,7 +18,7 @@ import {
 } from "@/lib/mesai";
 import { getHoliday } from "@/lib/holidays";
 import { toast } from "sonner";
-import { Trash2, Save, Sparkles, Briefcase, Sun, Stethoscope, Calendar as CalIcon, Coffee, MinusCircle } from "lucide-react";
+import { Trash2, Save, Sparkles, Briefcase, Sun, Calendar as CalIcon } from "lucide-react";
 
 const searchSchema = z.object({
   date: z.string().optional(),
@@ -42,51 +42,24 @@ const STATUS_META: Record<
     bg: "bg-success/10",
     border: "border-success",
   },
-  halfLeave: {
-    icon: MinusCircle,
-    tone: "text-warning",
-    bg: "bg-warning/10",
-    border: "border-warning",
-  },
-  fullLeave: {
-    icon: Sun,
-    tone: "text-warning",
-    bg: "bg-warning/10",
-    border: "border-warning",
-  },
-  sick: {
-    icon: Stethoscope,
-    tone: "text-info",
-    bg: "bg-info/10",
-    border: "border-info",
-  },
   holiday: {
     icon: Sparkles,
     tone: "text-status-holiday",
     bg: "bg-status-holiday/10",
     border: "border-status-holiday",
   },
-  weekendOff: {
-    icon: Coffee,
-    tone: "text-muted-foreground",
-    bg: "bg-muted",
-    border: "border-muted-foreground",
+  leave: {
+    icon: Sun,
+    tone: "text-warning",
+    bg: "bg-warning/10",
+    border: "border-warning",
   },
 };
 
-const STATUS_ORDER: DayStatus[] = [
-  "normal",
-  "halfLeave",
-  "fullLeave",
-  "sick",
-  "holiday",
-  "weekendOff",
-];
+const STATUS_ORDER: DayStatus[] = ["normal", "holiday", "leave"];
 
 function defaultStatusFor(date: string): DayStatus {
   if (getHoliday(date)) return "holiday";
-  const day = parseYMD(date).getDay();
-  if (day === 0 || day === 6) return "weekendOff";
   return "normal";
 }
 
@@ -138,7 +111,7 @@ function DayAddPage() {
   const rate = hourlyRate(settings);
   const hMult = holidayMultiplier(settings);
   const ot = num(otHours);
-  const otAllowed = status !== "fullLeave" && status !== "sick";
+  const otAllowed = status !== "leave";
   const effectiveOtType: OTType = status === "holiday" ? "holiday" : otType;
   const otEarn = !otAllowed
     ? 0
@@ -241,21 +214,12 @@ function DayAddPage() {
 
         {!otAllowed ? (
           <div className="rounded-[20px] border border-border bg-muted/40 p-5 text-center text-sm text-muted-foreground">
-            {status === "fullLeave"
-              ? "Tam gün izinli olduğunuz için bu güne mesai veya kesinti eklenemez."
-              : "Raporlu gün — mesai veya kesinti eklenemez."}
+            İzinli gün — mesai veya kesinti eklenemez.
           </div>
         ) : (
           <>
             <div className="card-gradient rounded-[20px] pt-6 pb-6 px-5">
-              <Label className="mb-4 block">
-                Fazla Mesai
-                {status === "weekendOff" && (
-                  <span className="ml-2 text-xs font-normal text-muted-foreground">
-                    (Hafta tatili mesaisi)
-                  </span>
-                )}
-              </Label>
+              <Label className="mb-4 block">Fazla Mesai</Label>
               {status === "holiday" ? (
                 <div className="mb-5 rounded-xl border border-status-holiday bg-status-holiday/10 p-3 text-sm text-status-holiday">
                   Resmi Tatil Mesaisi — x {hMult} (%{holidayPct})

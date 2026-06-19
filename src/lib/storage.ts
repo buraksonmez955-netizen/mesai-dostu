@@ -30,11 +30,15 @@ function normalizeSettings(value: Partial<Settings>): Settings {
   };
 }
 
-function inferStatus(e: DayEntry): DayStatus {
+function inferStatus(e: { date: string }): DayStatus {
   if (getHoliday(e.date)) return "holiday";
-  const [y, m, d] = e.date.split("-").map(Number);
-  const day = new Date(y, m - 1, d).getDay();
-  if (day === 0 || day === 6) return "weekendOff";
+  return "normal";
+}
+
+function migrateStatus(raw: unknown): DayStatus {
+  if (raw === "holiday") return "holiday";
+  if (raw === "halfLeave" || raw === "fullLeave" || raw === "sick" || raw === "leave") return "leave";
+  // "normal", "weekendOff" ve diğer/eksik değerler → normal
   return "normal";
 }
 
@@ -47,10 +51,11 @@ function normalizeEntry(
   const overtimeHoliday = toNumber(entry.overtimeHoliday) || (entry.overtimeType === "holiday" ? legacyOvertimeHours : 0);
   const lateHours = toNumber(entry.lateHours);
   const leaveHours = toNumber(entry.leaveHours);
+  const status: DayStatus = entry.status ? migrateStatus(entry.status) : inferStatus({ date: entry.date });
 
   return {
     date: entry.date,
-    status: (entry.status as DayStatus) ?? inferStatus(entry as DayEntry),
+    status,
     overtime50,
     overtime100,
     overtimeHoliday,

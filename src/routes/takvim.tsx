@@ -14,11 +14,8 @@ export const Route = createFileRoute("/takvim")({
 
 const STATUS_DOT: Record<DayStatus, string> = {
   normal: "bg-success",
-  halfLeave: "bg-warning",
-  fullLeave: "bg-warning",
-  sick: "bg-info",
   holiday: "bg-status-holiday",
-  weekendOff: "bg-muted-foreground",
+  leave: "bg-warning",
 };
 
 function TakvimPage() {
@@ -29,11 +26,8 @@ function TakvimPage() {
   const datesByStatus = useMemo(() => {
     const map: Record<DayStatus, Date[]> = {
       normal: [],
-      halfLeave: [],
-      fullLeave: [],
-      sick: [],
       holiday: [],
-      weekendOff: [],
+      leave: [],
     };
     for (const e of entries) {
       map[e.status]?.push(parseYMD(e.date));
@@ -88,27 +82,18 @@ function TakvimPage() {
           modifiers={{
             holiday: holidayDates,
             sNormal: datesByStatus.normal,
-            sHalfLeave: datesByStatus.halfLeave,
-            sFullLeave: datesByStatus.fullLeave,
-            sSick: datesByStatus.sick,
+            sLeave: datesByStatus.leave,
             sHoliday: datesByStatus.holiday,
-            sWeekend: datesByStatus.weekendOff,
             hasDeduction: deductionDates,
           }}
           modifiersClassNames={{
             holiday: "!text-status-holiday font-semibold",
             sNormal:
               "!bg-success/15 !text-success-foreground !border !border-success/40 rounded-md",
-            sHalfLeave:
+            sLeave:
               "!bg-warning/20 !text-warning-foreground !border !border-warning/50 rounded-md",
-            sFullLeave:
-              "!bg-warning/30 !text-warning-foreground !border !border-warning rounded-md",
-            sSick:
-              "!bg-info/15 !text-info !border !border-info/40 rounded-md",
             sHoliday:
               "!bg-status-holiday/15 !text-status-holiday !border !border-status-holiday/50 rounded-md",
-            sWeekend:
-              "!bg-muted !text-muted-foreground !border !border-border rounded-md",
             hasDeduction:
               "relative after:absolute after:top-0.5 after:right-0.5 after:h-1.5 after:w-1.5 after:rounded-full after:bg-destructive",
           }}
@@ -121,12 +106,11 @@ function TakvimPage() {
 
       <div className="mb-4 grid grid-cols-2 gap-x-3 gap-y-1.5 px-1 text-xs text-muted-foreground">
         <Legend dot="bg-success" label="Normal" />
-        <Legend dot="bg-warning" label="İzin (Tam / Yarım)" />
-        <Legend dot="bg-info" label="Raporlu" />
+        <Legend dot="bg-warning" label="İzinli Gün" />
         <Legend dot="bg-status-holiday" label="Resmi Tatil" />
-        <Legend dot="bg-muted-foreground" label="Hafta Tatili" />
         <Legend dot="bg-destructive" label="Kesinti var" />
       </div>
+
 
       {monthHolidays.length > 0 && (
         <>
