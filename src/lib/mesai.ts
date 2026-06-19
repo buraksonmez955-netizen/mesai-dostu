@@ -1,14 +1,20 @@
+import { isHoliday } from "./holidays";
+
 export type Settings = {
   netSalary: number;
   weeklyHours: number;
   dailyHours: number;
   monthlyHours: number;
+  /** Resmi tatil mesaisi katsayısı (varsayılan 2.0 = %100 zamlı) */
+  holidayMultiplier: number;
 };
 
 export type DayEntry = {
   date: string; // YYYY-MM-DD
   overtime50: number;
   overtime100: number;
+  /** Resmi tatil mesaisi saati */
+  overtimeHoliday: number;
   lateHours: number;
   leaveHours: number;
   note: string;
@@ -19,6 +25,7 @@ export const defaultSettings: Settings = {
   weeklyHours: 45,
   dailyHours: 9,
   monthlyHours: 225,
+  holidayMultiplier: 2,
 };
 
 export function monthlyHours(s: Settings): number {
@@ -28,6 +35,10 @@ export function monthlyHours(s: Settings): number {
 export function hourlyRate(s: Settings): number {
   if (!s.netSalary || s.netSalary <= 0) return 0;
   return s.netSalary / monthlyHours(s);
+}
+
+export function holidayMultiplier(s: Settings): number {
+  return s.holidayMultiplier && s.holidayMultiplier > 0 ? s.holidayMultiplier : 2;
 }
 
 export function formatTRY(n: number): string {
@@ -45,8 +56,10 @@ export function formatHours(n: number): string {
 export type MonthSummary = {
   total50Hours: number;
   total100Hours: number;
+  totalHolidayHours: number;
   earn50: number;
   earn100: number;
+  earnHoliday: number;
   totalOvertimeEarn: number;
   totalLateHours: number;
   totalLeaveHours: number;
@@ -63,6 +76,7 @@ export function summarizeMonth(
   month: number, // 0-indexed
 ): MonthSummary {
   const rate = hourlyRate(s);
+  const hMult = holidayMultiplier(s);
   const inMonth = entries.filter((e) => {
     const d = new Date(e.date);
     return d.getFullYear() === year && d.getMonth() === month;
@@ -70,12 +84,14 @@ export function summarizeMonth(
 
   const total50Hours = inMonth.reduce((a, b) => a + (b.overtime50 || 0), 0);
   const total100Hours = inMonth.reduce((a, b) => a + (b.overtime100 || 0), 0);
+  const totalHolidayHours = inMonth.reduce((a, b) => a + (b.overtimeHoliday || 0), 0);
   const totalLateHours = inMonth.reduce((a, b) => a + (b.lateHours || 0), 0);
   const totalLeaveHours = inMonth.reduce((a, b) => a + (b.leaveHours || 0), 0);
 
   const earn50 = rate * 1.5 * total50Hours;
   const earn100 = rate * 2 * total100Hours;
-  const totalOvertimeEarn = earn50 + earn100;
+  const earnHoliday = rate * hMult * totalHolidayHours;
+  const totalOvertimeEarn = earn50 + earn100 + earnHoliday;
   const lateDeduction = rate * totalLateHours;
   const leaveDeduction = rate * totalLeaveHours;
   const totalDeduction = lateDeduction + leaveDeduction;
@@ -84,8 +100,10 @@ export function summarizeMonth(
   return {
     total50Hours,
     total100Hours,
+    totalHolidayHours,
     earn50,
     earn100,
+    earnHoliday,
     totalOvertimeEarn,
     totalLateHours,
     totalLeaveHours,
@@ -122,3 +140,5 @@ export function parseYMD(s: string): Date {
   const [y, m, d] = s.split("-").map(Number);
   return new Date(y, m - 1, d);
 }
+
+export { isHoliday };

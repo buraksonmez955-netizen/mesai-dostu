@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { formatTRY, hourlyRate, parseYMD, ymd } from "@/lib/mesai";
+import { formatTRY, holidayMultiplier, hourlyRate, parseYMD, ymd } from "@/lib/mesai";
+import { getHoliday } from "@/lib/holidays";
 import { toast } from "sonner";
-import { Trash2, Save } from "lucide-react";
+import { Trash2, Save, Sparkles } from "lucide-react";
 
 const searchSchema = z.object({
   date: z.string().optional(),
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/gun-ekle")({
   component: DayAddPage,
 });
 
-type OTType = "50" | "100";
+type OTType = "50" | "100" | "holiday";
 
 function DayAddPage() {
   const { date: searchDate } = Route.useSearch();
@@ -38,32 +39,42 @@ function DayAddPage() {
   const [note, setNote] = useState("");
 
   const existing = useMemo(() => entries.find((e) => e.date === date), [entries, date]);
+  const holiday = useMemo(() => getHoliday(date), [date]);
 
   useEffect(() => {
     if (existing) {
-      if (existing.overtime100 > 0 && existing.overtime50 === 0) {
+      if (existing.overtimeHoliday > 0) {
+        setOtType("holiday");
+        setOtHours(String(existing.overtimeHoliday));
+      } else if (existing.overtime100 > 0 && existing.overtime50 === 0) {
         setOtType("100");
         setOtHours(String(existing.overtime100));
       } else {
-        setOtType("50");
+        setOtType(holiday ? "holiday" : "50");
         setOtHours(existing.overtime50 ? String(existing.overtime50) : "");
       }
       setLateHours(existing.lateHours ? String(existing.lateHours) : "");
       setLeaveHours(existing.leaveHours ? String(existing.leaveHours) : "");
       setNote(existing.note ?? "");
     } else {
-      setOtType("50");
+      setOtType(holiday ? "holiday" : "50");
       setOtHours("");
       setLateHours("");
       setLeaveHours("");
       setNote("");
     }
-  }, [existing, date]);
+  }, [existing, date, holiday]);
 
   const num = (s: string) => Number(s.replace(",", ".")) || 0;
   const rate = hourlyRate(settings);
+  const hMult = holidayMultiplier(settings);
   const ot = num(otHours);
-  const otEarn = otType === "50" ? rate * 1.5 * ot : rate * 2 * ot;
+  const otEarn =
+    otType === "50"
+      ? rate * 1.5 * ot
+      : otType === "100"
+        ? rate * 2 * ot
+        : rate * hMult * ot;
   const lateDed = rate * num(lateHours);
   const leaveDed = rate * num(leaveHours);
   const dayNet = otEarn - lateDed - leaveDed;
@@ -73,6 +84,7 @@ function DayAddPage() {
       date,
       overtime50: otType === "50" ? num(otHours) : 0,
       overtime100: otType === "100" ? num(otHours) : 0,
+      overtimeHoliday: otType === "holiday" ? num(otHours) : 0,
       lateHours: num(lateHours),
       leaveHours: num(leaveHours),
       note,
@@ -95,6 +107,8 @@ function DayAddPage() {
     weekday: "long",
   });
 
+  const holidayPct = Math.round((hMult - 1) * 100);
+
   return (
     <AppLayout title="Günlük Kayıt">
       <div className="space-y-4">
@@ -110,9 +124,19 @@ function DayAddPage() {
           <p className="mt-2 text-xs text-muted-foreground">{niceDate}</p>
         </div>
 
+        {holiday && (
+          <div className="flex items-start gap-2 rounded-2xl border-2 border-destructive/40 bg-destructive/5 p-4">
+            <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+            <div>
+              <p className="text-sm font-semibold text-destructive">Bugün Resmi Tatil</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{holiday.name}</p>
+            </div>
+          </div>
+        )}
+
         <div className="card-gradient rounded-2xl p-5">
           <Label className="mb-2 block">Fazla Mesai</Label>
-          <div className="mb-3 grid grid-cols-2 gap-2">
+          <div className={`mb-3 grid gap-2 ${holiday ? "grid-cols-3" : "grid-cols-2"}`}>
             <button
               type="button"
               onClick={() => setOtType("50")}
@@ -122,7 +146,7 @@ function DayAddPage() {
                   : "border-border text-muted-foreground"
               }`}
             >
-              %50 Mesai
+              %50
               <div className="text-[10px] opacity-75">x 1.5</div>
             </button>
             <button
@@ -134,9 +158,23 @@ function DayAddPage() {
                   : "border-border text-muted-foreground"
               }`}
             >
-              %100 Mesai
+              %100
               <div className="text-[10px] opacity-75">x 2</div>
             </button>
+            {holiday && (
+              <button
+                type="button"
+                onClick={() => setOtType("holiday")}
+                className={`rounded-xl border p-3 text-sm font-medium transition ${
+                  otType === "holiday"
+                    ? "border-destructive bg-destructive/10 text-destructive"
+                    : "border-border text-muted-foreground"
+                }`}
+              >
+                Tatil
+                <div className="text-[10px] opacity-75">x {hMult} (%{holidayPct})</div>
+              </button>
+            )}
           </div>
           <Input
             inputMode="decimal"
@@ -185,7 +223,7 @@ function DayAddPage() {
 
         <div className="primary-gradient rounded-2xl p-5">
           <p className="text-xs uppercase tracking-widest opacity-80">Bu Günün Net Etkisi</p>
-          <p className={`mt-1 text-2xl font-bold ${dayNet < 0 ? "" : ""}`}>
+          <p className="mt-1 text-2xl font-bold">
             {dayNet >= 0 ? "+" : ""}
             {formatTRY(dayNet)}
           </p>

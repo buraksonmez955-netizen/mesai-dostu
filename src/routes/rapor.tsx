@@ -55,6 +55,8 @@ function ReportPage() {
         <Row label="%50 Mesai Kazancı" value={formatTRY(summary.earn50)} />
         <Row label="Toplam %100 Mesai" value={formatHours(summary.total100Hours)} />
         <Row label="%100 Mesai Kazancı" value={formatTRY(summary.earn100)} />
+        <Row label="Toplam Resmi Tatil Mesaisi" value={formatHours(summary.totalHolidayHours)} />
+        <Row label="Resmi Tatil Mesai Kazancı" value={formatTRY(summary.earnHoliday)} />
         <Row label="Toplam Mesai Kazancı" value={formatTRY(summary.totalOvertimeEarn)} strong tone="success" />
       </Section>
 
