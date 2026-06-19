@@ -19,7 +19,7 @@ const STATUS_DOT: Record<DayStatus, string> = {
 };
 
 function TakvimPage() {
-  const { entries } = useEntries();
+  const { entries, loaded } = useEntries();
   const navigate = useNavigate();
   const [month, setMonth] = useState<Date>(new Date());
 
