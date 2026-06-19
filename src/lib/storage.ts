@@ -176,8 +176,8 @@ function writeSettings(s: Settings) {
 }
 
 export function useSettings() {
-  const [settings, setSettings] = useState<Settings>(defaultSettings);
-  const [loaded, setLoaded] = useState(false);
+  const [settings, setSettings] = useState<Settings>(() => readSettings());
+  const [loaded, setLoaded] = useState<boolean>(() => typeof window !== "undefined");
 
   useEffect(() => {
     setSettings(readSettings());
