@@ -103,7 +103,7 @@ export function summarizeMonth(
   const rate = hourlyRate(s);
   const hMult = holidayMultiplier(s);
   const inMonth = entries.filter((e) => {
-    const d = new Date(e.date);
+    const d = parseYMD(e.date);
     return d.getFullYear() === year && d.getMonth() === month;
   });
 
