@@ -23,6 +23,7 @@ function SettingsPage() {
   const [weeklyHours, setWeeklyHours] = useState("");
   const [dailyHours, setDailyHours] = useState("");
   const [monthlyHoursStr, setMonthlyHoursStr] = useState("");
+  const [holidayMult, setHolidayMult] = useState("");
 
   useEffect(() => {
     if (loaded) {
@@ -30,6 +31,7 @@ function SettingsPage() {
       setWeeklyHours(String(settings.weeklyHours));
       setDailyHours(String(settings.dailyHours));
       setMonthlyHoursStr(String(settings.monthlyHours || 225));
+      setHolidayMult(String(settings.holidayMultiplier ?? 2));
     }
   }, [loaded, settings]);
 
@@ -38,8 +40,10 @@ function SettingsPage() {
     weeklyHours: Number(weeklyHours.replace(",", ".")) || 45,
     dailyHours: Number(dailyHours.replace(",", ".")) || 9,
     monthlyHours: Number(monthlyHoursStr.replace(",", ".")) || 225,
+    holidayMultiplier: Number(holidayMult.replace(",", ".")) || 2,
   };
   const rate = hourlyRate(parsed);
+  const holidayPct = Math.round((parsed.holidayMultiplier - 1) * 100);
 
   const onSave = () => {
     if (parsed.netSalary <= 0) {
@@ -105,6 +109,23 @@ function SettingsPage() {
           />
           <p className="mt-2 text-xs text-muted-foreground">
             Saatlik ücret bu değere göre hesaplanır. Varsayılan: 225 saat.
+          </p>
+        </div>
+
+        <div className="card-gradient rounded-2xl p-5">
+          <Label htmlFor="holiday" className="text-sm font-medium">
+            Resmi Tatil Mesai Katsayısı
+          </Label>
+          <Input
+            id="holiday"
+            inputMode="decimal"
+            placeholder="2"
+            value={holidayMult}
+            onChange={(e) => setHolidayMult(e.target.value)}
+            className="mt-2 h-12 text-lg"
+          />
+          <p className="mt-2 text-xs text-muted-foreground">
+            Saatlik ücret × katsayı. Varsayılan 2 (%100 zamlı). Şu anki zam: %{holidayPct}.
           </p>
         </div>
 
