@@ -1,13 +1,29 @@
 import { useEffect, useState } from "react";
 import { Calendar, Clock } from "lucide-react";
 
+const SPLASH_FLAG = "mesai_splash_shown";
+
 export function SplashScreen() {
   const [mounted, setMounted] = useState(false);
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
   const [fading, setFading] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    let alreadyShown = false;
+    try {
+      alreadyShown = sessionStorage.getItem(SPLASH_FLAG) === "1";
+    } catch {
+      // ignore
+    }
+    if (alreadyShown) return;
+
+    setVisible(true);
+    try {
+      sessionStorage.setItem(SPLASH_FLAG, "1");
+    } catch {
+      // ignore
+    }
     const fadeTimer = setTimeout(() => setFading(true), 1600);
     const hideTimer = setTimeout(() => setVisible(false), 2100);
     return () => {
