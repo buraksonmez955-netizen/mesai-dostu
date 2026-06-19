@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppLayout } from "@/components/AppLayout";
 import { useEntries, useSettings } from "@/lib/storage";
-import { formatHours, formatTRY, hourlyRate, MONTHS_TR, parseYMD } from "@/lib/mesai";
+import { formatHours, formatTRY, holidayMultiplier, hourlyRate, MONTHS_TR, parseYMD } from "@/lib/mesai";
 import { useMemo } from "react";
 import { ChevronRight } from "lucide-react";
 
@@ -15,6 +15,7 @@ function HistoryPage() {
   const { settings } = useSettings();
   const navigate = useNavigate();
   const rate = hourlyRate(settings);
+  const hMult = holidayMultiplier(settings);
 
   const groups = useMemo(() => {
     const map = new Map<string, typeof entries>();
@@ -58,7 +59,10 @@ function HistoryPage() {
             <ul className="space-y-2">
               {g.list.map((e) => {
                 const d = parseYMD(e.date);
-                const otEarn = rate * 1.5 * e.overtime50 + rate * 2 * e.overtime100;
+                const otEarn =
+                  rate * 1.5 * e.overtime50 +
+                  rate * 2 * e.overtime100 +
+                  rate * hMult * (e.overtimeHoliday || 0);
                 const ded = rate * (e.lateHours + e.leaveHours);
                 const net = otEarn - ded;
                 return (
@@ -78,6 +82,7 @@ function HistoryPage() {
                         <p className="mt-0.5 truncate text-xs text-muted-foreground">
                           {e.overtime50 > 0 && `%50 ${formatHours(e.overtime50)} `}
                           {e.overtime100 > 0 && `%100 ${formatHours(e.overtime100)} `}
+                          {(e.overtimeHoliday || 0) > 0 && `Tatil ${formatHours(e.overtimeHoliday)} `}
                           {e.lateHours > 0 && `Geç ${formatHours(e.lateHours)} `}
                           {e.leaveHours > 0 && `İzin ${formatHours(e.leaveHours)}`}
                           {e.note && ` • ${e.note}`}
