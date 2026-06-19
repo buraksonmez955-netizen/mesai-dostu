@@ -1,9 +1,35 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppLayout } from "@/components/AppLayout";
 import { useEntries, useSettings } from "@/lib/storage";
-import { formatHours, formatTRY, holidayMultiplier, hourlyRate, MONTHS_TR, parseYMD } from "@/lib/mesai";
+import {
+  DAY_STATUS_LABEL,
+  formatHours,
+  formatTRY,
+  holidayMultiplier,
+  hourlyRate,
+  MONTHS_TR,
+  parseYMD,
+  type DayStatus,
+} from "@/lib/mesai";
 import { useMemo } from "react";
-import { ChevronRight } from "lucide-react";
+import {
+  Briefcase,
+  ChevronRight,
+  Coffee,
+  MinusCircle,
+  Sparkles,
+  Stethoscope,
+  Sun,
+} from "lucide-react";
+
+const STATUS_ICON: Record<DayStatus, { Icon: typeof Briefcase; tone: string }> = {
+  normal: { Icon: Briefcase, tone: "text-success" },
+  halfLeave: { Icon: MinusCircle, tone: "text-warning" },
+  fullLeave: { Icon: Sun, tone: "text-warning" },
+  sick: { Icon: Stethoscope, tone: "text-info" },
+  holiday: { Icon: Sparkles, tone: "text-status-holiday" },
+  weekendOff: { Icon: Coffee, tone: "text-muted-foreground" },
+};
 
 export const Route = createFileRoute("/gecmis")({
   head: () => ({ meta: [{ title: "Geçmiş Kayıtlar — Mesai Defteri" }] }),
