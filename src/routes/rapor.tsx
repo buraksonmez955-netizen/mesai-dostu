@@ -57,7 +57,17 @@ function ReportPage() {
         <Row label="%100 Mesai Kazancı" value={formatTRY(summary.earn100)} />
         <Row label="Toplam Resmi Tatil Mesaisi" value={formatHours(summary.totalHolidayHours)} />
         <Row label="Resmi Tatil Mesai Kazancı" value={formatTRY(summary.earnHoliday)} />
+        <Row label="Toplam Hafta Tatili Mesaisi" value={formatHours(summary.totalWeekendHours)} />
+        <Row label="Hafta Tatili Mesai Kazancı" value={formatTRY(summary.earnWeekend)} />
         <Row label="Toplam Mesai Kazancı" value={formatTRY(summary.totalOvertimeEarn)} strong tone="success" />
+      </Section>
+
+      <Section title="İzin & Devamsızlık">
+        <Row label="Toplam Tam Gün İzin" value={`${summary.fullLeaveDays} gün`} />
+        <Row label="Toplam Yarım Gün İzin" value={`${summary.halfLeaveDays} gün`} />
+        <Row label="Toplam Raporlu Gün" value={`${summary.sickDays} gün`} />
+        <Row label="Resmi Tatil Mesai Günü" value={`${summary.holidayShiftDays} gün`} />
+        <Row label="Hafta Tatili Mesai Günü" value={`${summary.weekendShiftDays} gün`} />
       </Section>
 
       <Section title="Kesintiler">
