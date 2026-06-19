@@ -15,20 +15,14 @@ import { useMemo } from "react";
 import {
   Briefcase,
   ChevronRight,
-  Coffee,
-  MinusCircle,
   Sparkles,
-  Stethoscope,
   Sun,
 } from "lucide-react";
 
 const STATUS_ICON: Record<DayStatus, { Icon: typeof Briefcase; tone: string }> = {
   normal: { Icon: Briefcase, tone: "text-success" },
-  halfLeave: { Icon: MinusCircle, tone: "text-warning" },
-  fullLeave: { Icon: Sun, tone: "text-warning" },
-  sick: { Icon: Stethoscope, tone: "text-info" },
   holiday: { Icon: Sparkles, tone: "text-status-holiday" },
-  weekendOff: { Icon: Coffee, tone: "text-muted-foreground" },
+  leave: { Icon: Sun, tone: "text-warning" },
 };
 
 export const Route = createFileRoute("/gecmis")({
