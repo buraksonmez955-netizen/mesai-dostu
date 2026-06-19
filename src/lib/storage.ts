@@ -207,8 +207,8 @@ export function useSettings() {
 }
 
 export function useEntries() {
-  const [entries, setEntries] = useState<DayEntry[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const [entries, setEntries] = useState<DayEntry[]>(() => readEntries());
+  const [loaded, setLoaded] = useState<boolean>(() => typeof window !== "undefined");
   const loadedRef = useRef(false);
 
   useEffect(() => {
