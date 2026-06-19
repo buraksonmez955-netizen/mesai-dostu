@@ -93,6 +93,21 @@ function SettingsPage() {
           />
         </div>
 
+        <div className="card-gradient rounded-2xl p-5">
+          <Label htmlFor="monthly" className="text-sm font-medium">Aylık Çalışma Saati</Label>
+          <Input
+            id="monthly"
+            inputMode="decimal"
+            placeholder="225"
+            value={monthlyHoursStr}
+            onChange={(e) => setMonthlyHoursStr(e.target.value)}
+            className="mt-2 h-12 text-lg"
+          />
+          <p className="mt-2 text-xs text-muted-foreground">
+            Saatlik ücret bu değere göre hesaplanır. Varsayılan: 225 saat.
+          </p>
+        </div>
+
         <div className="primary-gradient rounded-2xl p-5">
           <p className="text-xs uppercase tracking-widest opacity-80">Hesaplanan Saatlik Ücret</p>
           <p className="mt-1 text-3xl font-bold">{formatTRY(rate)}</p>
