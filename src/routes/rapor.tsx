@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppLayout } from "@/components/AppLayout";
 import { useEntries, useSettings } from "@/lib/storage";
 import { formatHours, formatTRY, hourlyRate, MONTHS_TR, summarizeMonth } from "@/lib/mesai";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/rapor")({
@@ -11,14 +11,18 @@ export const Route = createFileRoute("/rapor")({
 });
 
 function ReportPage() {
-  const { entries } = useEntries();
-  const { settings } = useSettings();
+  const { entries, loaded: entriesLoaded } = useEntries();
+  const { settings, loaded: settingsLoaded } = useSettings();
+  const loaded = entriesLoaded && settingsLoaded;
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
 
-  const summary = summarizeMonth(entries, settings, year, month);
-  const rate = hourlyRate(settings);
+  const summary = useMemo(
+    () => summarizeMonth(entries, settings, year, month),
+    [entries, settings, year, month],
+  );
+  const rate = useMemo(() => hourlyRate(settings), [settings]);
 
   const change = (delta: number) => {
     const d = new Date(year, month + delta, 1);
@@ -28,6 +32,11 @@ function ReportPage() {
 
   return (
     <AppLayout title="Aylık Rapor">
+      {!loaded && (
+        <div className="mb-4 card-gradient rounded-2xl p-4 text-center text-sm text-muted-foreground">
+          Kayıtlar yükleniyor...
+        </div>
+      )}
       <div className="mb-4 flex items-center justify-between rounded-xl bg-card p-2 shadow-[var(--shadow-card)]">
         <button onClick={() => change(-1)} className="rounded-lg p-2 hover:bg-muted">
           <ChevronLeft className="h-5 w-5" />
