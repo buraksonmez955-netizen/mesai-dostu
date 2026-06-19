@@ -15,14 +15,28 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const { settings, loaded } = useSettings();
-  const { entries } = useEntries();
+  const { settings, loaded: settingsLoaded } = useSettings();
+  const { entries, loaded: entriesLoaded } = useEntries();
+  const loaded = settingsLoaded && entriesLoaded;
   const now = new Date();
-  const summary = summarizeMonth(entries, settings, now.getFullYear(), now.getMonth());
-  const rate = hourlyRate(settings);
+  const summary = useMemo(
+    () => summarizeMonth(entries, settings, now.getFullYear(), now.getMonth()),
+    [entries, settings, now.getFullYear(), now.getMonth()],
+  );
+  const rate = useMemo(() => hourlyRate(settings), [settings]);
   const monthLabel = `${MONTHS_TR[now.getMonth()]} ${now.getFullYear()}`;
 
   const needsSetup = loaded && (!settings.netSalary || settings.netSalary <= 0);
+
+  if (!loaded) {
+    return (
+      <AppLayout title={monthLabel}>
+        <div className="card-gradient rounded-2xl p-8 text-center">
+          <p className="text-sm text-muted-foreground">Kayıtlar yükleniyor...</p>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout title={monthLabel}>
