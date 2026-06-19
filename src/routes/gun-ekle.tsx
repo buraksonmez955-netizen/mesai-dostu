@@ -18,7 +18,7 @@ import {
 } from "@/lib/mesai";
 import { getHoliday } from "@/lib/holidays";
 import { toast } from "sonner";
-import { Trash2, Save, Sparkles, Briefcase, Sun, Stethoscope, Calendar as CalIcon, Coffee, MinusCircle } from "lucide-react";
+import { Trash2, Save, Sparkles, Briefcase, Sun, Calendar as CalIcon } from "lucide-react";
 
 const searchSchema = z.object({
   date: z.string().optional(),
@@ -42,51 +42,24 @@ const STATUS_META: Record<
     bg: "bg-success/10",
     border: "border-success",
   },
-  halfLeave: {
-    icon: MinusCircle,
-    tone: "text-warning",
-    bg: "bg-warning/10",
-    border: "border-warning",
-  },
-  fullLeave: {
-    icon: Sun,
-    tone: "text-warning",
-    bg: "bg-warning/10",
-    border: "border-warning",
-  },
-  sick: {
-    icon: Stethoscope,
-    tone: "text-info",
-    bg: "bg-info/10",
-    border: "border-info",
-  },
   holiday: {
     icon: Sparkles,
     tone: "text-status-holiday",
     bg: "bg-status-holiday/10",
     border: "border-status-holiday",
   },
-  weekendOff: {
-    icon: Coffee,
-    tone: "text-muted-foreground",
-    bg: "bg-muted",
-    border: "border-muted-foreground",
+  leave: {
+    icon: Sun,
+    tone: "text-warning",
+    bg: "bg-warning/10",
+    border: "border-warning",
   },
 };
 
-const STATUS_ORDER: DayStatus[] = [
-  "normal",
-  "halfLeave",
-  "fullLeave",
-  "sick",
-  "holiday",
-  "weekendOff",
-];
+const STATUS_ORDER: DayStatus[] = ["normal", "holiday", "leave"];
 
 function defaultStatusFor(date: string): DayStatus {
   if (getHoliday(date)) return "holiday";
-  const day = parseYMD(date).getDay();
-  if (day === 0 || day === 6) return "weekendOff";
   return "normal";
 }
 
