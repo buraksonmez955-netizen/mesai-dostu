@@ -111,7 +111,7 @@ function DayAddPage() {
   const rate = hourlyRate(settings);
   const hMult = holidayMultiplier(settings);
   const ot = num(otHours);
-  const otAllowed = status !== "fullLeave" && status !== "sick";
+  const otAllowed = status !== "leave";
   const effectiveOtType: OTType = status === "holiday" ? "holiday" : otType;
   const otEarn = !otAllowed
     ? 0
