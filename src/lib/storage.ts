@@ -72,12 +72,12 @@ export function useEntries() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setEntries(readLS<DayEntry[]>(ENTRIES_KEY, []));
+    setEntries(migrateEntries(readLS<DayEntry[]>(ENTRIES_KEY, [])));
     setLoaded(true);
     const onUpdate = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail?.key === ENTRIES_KEY) {
-        setEntries(readLS<DayEntry[]>(ENTRIES_KEY, []));
+        setEntries(migrateEntries(readLS<DayEntry[]>(ENTRIES_KEY, [])));
       }
     };
     window.addEventListener("mesai:update", onUpdate);
