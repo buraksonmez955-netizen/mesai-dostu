@@ -10,6 +10,8 @@ const ENTRIES_KEY = "mesaiDefteriRecords";
 const LEGACY_SETTINGS_KEY = "mesai.settings.v1";
 const LEGACY_ENTRIES_KEY = "mesai.entries.v1";
 
+type StoredEntries = Record<string, Partial<Omit<DayEntry, "date">> & { date?: string }>;
+
 function inferStatus(e: DayEntry): DayStatus {
   if (getHoliday(e.date)) return "holiday";
   const [y, m, d] = e.date.split("-").map(Number);
@@ -18,8 +20,53 @@ function inferStatus(e: DayEntry): DayStatus {
   return "normal";
 }
 
-function migrateEntries(list: DayEntry[]): DayEntry[] {
-  return list.map((e) => ({
+function normalizeEntry(entry: Partial<DayEntry> & { date: string }): DayEntry {
+  const overtime50 = Number(entry.overtime50) || 0;
+  const overtime100 = Number(entry.overtime100) || 0;
+  const overtimeHoliday = Number(entry.overtimeHoliday) || 0;
+  const lateHours = Number(entry.lateHours) || 0;
+  const leaveHours = Number(entry.leaveHours) || 0;
+
+  return {
+    date: entry.date,
+    status: (entry.status as DayStatus) ?? inferStatus(entry as DayEntry),
+    overtime50,
+    overtime100,
+    overtimeHoliday,
+    lateHours,
+    leaveHours,
+    note: entry.note ?? "",
+  };
+}
+
+function entriesToRecord(list: DayEntry[]): StoredEntries {
+  return list.reduce<StoredEntries>((acc, entry) => {
+    const { date, ...rest } = normalizeEntry(entry);
+    acc[date] = rest;
+    return acc;
+  }, {});
+}
+
+function recordToEntries(record: StoredEntries): DayEntry[] {
+  return Object.entries(record)
+    .map(([date, value]) => normalizeEntry({ ...value, date: value.date ?? date }))
+    .sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
+function migrateEntries(value: unknown): DayEntry[] {
+  if (Array.isArray(value)) {
+    return value.map((e) => normalizeEntry(e)).sort((a, b) => (a.date < b.date ? 1 : -1));
+  }
+
+  if (value && typeof value === "object") {
+    return recordToEntries(value as StoredEntries);
+  }
+
+  return [];
+}
+
+function legacyEntryToCurrent(e: DayEntry): DayEntry {
+  return normalizeEntry({
     ...e,
     overtimeHoliday: e.overtimeHoliday ?? 0,
     overtime50: e.overtime50 ?? 0,
@@ -28,7 +75,7 @@ function migrateEntries(list: DayEntry[]): DayEntry[] {
     leaveHours: e.leaveHours ?? 0,
     note: e.note ?? "",
     status: (e.status as DayStatus) ?? inferStatus(e),
-  }));
+  });
 }
 
 function safeParse<T>(raw: string | null, fallback: T): T {
