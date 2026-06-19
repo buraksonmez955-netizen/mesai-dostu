@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Calendar } from "@/components/ui/calendar";
 import { useEntries } from "@/lib/storage";
 import { tr } from "date-fns/locale";
-import { ymd, parseYMD, formatHours } from "@/lib/mesai";
+import { ymd, parseYMD, formatHours, DAY_STATUS_LABEL, type DayStatus } from "@/lib/mesai";
 import { getHoliday, holidayDatesForYear } from "@/lib/holidays";
 import { useState, useMemo } from "react";
 
@@ -12,12 +12,43 @@ export const Route = createFileRoute("/takvim")({
   component: TakvimPage,
 });
 
+const STATUS_DOT: Record<DayStatus, string> = {
+  normal: "bg-success",
+  halfLeave: "bg-warning",
+  fullLeave: "bg-warning",
+  sick: "bg-info",
+  holiday: "bg-status-holiday",
+  weekendOff: "bg-muted-foreground",
+};
+
 function TakvimPage() {
   const { entries } = useEntries();
   const navigate = useNavigate();
   const [month, setMonth] = useState<Date>(new Date());
 
-  const entryDates = useMemo(() => entries.map((e) => parseYMD(e.date)), [entries]);
+  const datesByStatus = useMemo(() => {
+    const map: Record<DayStatus, Date[]> = {
+      normal: [],
+      halfLeave: [],
+      fullLeave: [],
+      sick: [],
+      holiday: [],
+      weekendOff: [],
+    };
+    for (const e of entries) {
+      map[e.status]?.push(parseYMD(e.date));
+    }
+    return map;
+  }, [entries]);
+
+  const deductionDates = useMemo(
+    () =>
+      entries
+        .filter((e) => (e.lateHours || 0) + (e.leaveHours || 0) > 0)
+        .map((e) => parseYMD(e.date)),
+    [entries],
+  );
+
   const holidayDates = useMemo(
     () => holidayDatesForYear(month.getFullYear()),
     [month],
@@ -54,12 +85,32 @@ function TakvimPage() {
           locale={tr}
           month={month}
           onMonthChange={setMonth}
-          modifiers={{ hasEntry: entryDates, holiday: holidayDates }}
+          modifiers={{
+            holiday: holidayDates,
+            sNormal: datesByStatus.normal,
+            sHalfLeave: datesByStatus.halfLeave,
+            sFullLeave: datesByStatus.fullLeave,
+            sSick: datesByStatus.sick,
+            sHoliday: datesByStatus.holiday,
+            sWeekend: datesByStatus.weekendOff,
+            hasDeduction: deductionDates,
+          }}
           modifiersClassNames={{
-            hasEntry:
-              "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-1 after:rounded-full after:bg-primary",
-            holiday:
-              "!border-2 !border-destructive !text-destructive font-semibold rounded-md",
+            holiday: "!text-status-holiday font-semibold",
+            sNormal:
+              "!bg-success/15 !text-success-foreground !border !border-success/40 rounded-md",
+            sHalfLeave:
+              "!bg-warning/20 !text-warning-foreground !border !border-warning/50 rounded-md",
+            sFullLeave:
+              "!bg-warning/30 !text-warning-foreground !border !border-warning rounded-md",
+            sSick:
+              "!bg-info/15 !text-info !border !border-info/40 rounded-md",
+            sHoliday:
+              "!bg-status-holiday/15 !text-status-holiday !border !border-status-holiday/50 rounded-md",
+            sWeekend:
+              "!bg-muted !text-muted-foreground !border !border-border rounded-md",
+            hasDeduction:
+              "relative after:absolute after:top-0.5 after:right-0.5 after:h-1.5 after:w-1.5 after:rounded-full after:bg-destructive",
           }}
           onSelect={(d) => {
             if (d) navigate({ to: "/gun-ekle", search: { date: ymd(d) } });
@@ -68,15 +119,13 @@ function TakvimPage() {
         />
       </div>
 
-      <div className="mb-4 flex items-center gap-4 px-1 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <span className="h-3 w-3 rounded border-2 border-destructive" />
-          Resmi Tatil
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-          Mesai Kaydı
-        </span>
+      <div className="mb-4 grid grid-cols-2 gap-x-3 gap-y-1.5 px-1 text-xs text-muted-foreground">
+        <Legend dot="bg-success" label="Normal" />
+        <Legend dot="bg-warning" label="İzin (Tam / Yarım)" />
+        <Legend dot="bg-info" label="Raporlu" />
+        <Legend dot="bg-status-holiday" label="Resmi Tatil" />
+        <Legend dot="bg-muted-foreground" label="Hafta Tatili" />
+        <Legend dot="bg-destructive" label="Kesinti var" />
       </div>
 
       {monthHolidays.length > 0 && (
@@ -88,9 +137,9 @@ function TakvimPage() {
             {monthHolidays.map(({ date, h }) => (
               <li
                 key={h.date}
-                className="flex items-center justify-between rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm"
+                className="flex items-center justify-between rounded-xl border border-status-holiday/30 bg-status-holiday/5 px-3 py-2 text-sm"
               >
-                <span className="font-medium text-destructive">{h.name}</span>
+                <span className="font-medium text-status-holiday">{h.name}</span>
                 <span className="text-xs text-muted-foreground">
                   {date.toLocaleDateString("tr-TR", { day: "2-digit", month: "short", weekday: "short" })}
                 </span>
@@ -109,25 +158,29 @@ function TakvimPage() {
         <ul className="space-y-2">
           {entriesThisMonth.map((e) => {
             const d = parseYMD(e.date);
-            const h = getHoliday(e.date);
             return (
               <li key={e.date}>
                 <button
                   onClick={() => navigate({ to: "/gun-ekle", search: { date: e.date } })}
                   className="card-gradient flex w-full items-center justify-between rounded-xl p-3 text-left transition active:scale-[0.99]"
                 >
-                  <div>
-                    <p className="text-sm font-semibold">
-                      {d.toLocaleDateString("tr-TR", { day: "2-digit", month: "long", weekday: "short" })}
-                      {h && <span className="ml-2 text-xs font-normal text-destructive">• {h.name}</span>}
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {e.overtime50 > 0 && `%50: ${formatHours(e.overtime50)}  `}
-                      {e.overtime100 > 0 && `%100: ${formatHours(e.overtime100)}  `}
-                      {e.overtimeHoliday > 0 && `Tatil: ${formatHours(e.overtimeHoliday)}  `}
-                      {e.lateHours > 0 && `Geç: ${formatHours(e.lateHours)}  `}
-                      {e.leaveHours > 0 && `İzin: ${formatHours(e.leaveHours)}`}
-                    </p>
+                  <div className="flex items-center gap-2">
+                    <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_DOT[e.status]}`} />
+                    <div>
+                      <p className="text-sm font-semibold">
+                        {d.toLocaleDateString("tr-TR", { day: "2-digit", month: "long", weekday: "short" })}
+                        <span className="ml-2 text-xs font-normal text-muted-foreground">
+                          • {DAY_STATUS_LABEL[e.status]}
+                        </span>
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {e.overtime50 > 0 && `%50: ${formatHours(e.overtime50)}  `}
+                        {e.overtime100 > 0 && `%100: ${formatHours(e.overtime100)}  `}
+                        {e.overtimeHoliday > 0 && `Tatil: ${formatHours(e.overtimeHoliday)}  `}
+                        {e.lateHours > 0 && `Geç: ${formatHours(e.lateHours)}  `}
+                        {e.leaveHours > 0 && `İzin: ${formatHours(e.leaveHours)}`}
+                      </p>
+                    </div>
                   </div>
                 </button>
               </li>
@@ -136,5 +189,14 @@ function TakvimPage() {
         </ul>
       )}
     </AppLayout>
+  );
+}
+
+function Legend({ dot, label }: { dot: string; label: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className={`h-2.5 w-2.5 rounded-full ${dot}`} />
+      {label}
+    </span>
   );
 }
