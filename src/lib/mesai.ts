@@ -75,15 +75,22 @@ export type MonthSummary = {
   total50Hours: number;
   total100Hours: number;
   totalHolidayHours: number;
+  totalWeekendHours: number;
   earn50: number;
   earn100: number;
   earnHoliday: number;
+  earnWeekend: number;
   totalOvertimeEarn: number;
   totalLateHours: number;
   totalLeaveHours: number;
   lateDeduction: number;
   leaveDeduction: number;
   totalDeduction: number;
+  fullLeaveDays: number;
+  halfLeaveDays: number;
+  sickDays: number;
+  holidayShiftDays: number;
+  weekendShiftDays: number;
   net: number;
 };
 
@@ -106,28 +113,52 @@ export function summarizeMonth(
   const totalLateHours = inMonth.reduce((a, b) => a + (b.lateHours || 0), 0);
   const totalLeaveHours = inMonth.reduce((a, b) => a + (b.leaveHours || 0), 0);
 
+  const weekendEntries = inMonth.filter((e) => e.status === "weekendOff");
+  const totalWeekendHours = weekendEntries.reduce(
+    (a, b) => a + (b.overtime50 || 0) + (b.overtime100 || 0),
+    0,
+  );
+
   const earn50 = rate * 1.5 * total50Hours;
   const earn100 = rate * 2 * total100Hours;
   const earnHoliday = rate * hMult * totalHolidayHours;
-  const totalOvertimeEarn = earn50 + earn100 + earnHoliday;
+  const earnWeekend = rate * hMult * totalWeekendHours;
+  const totalOvertimeEarn = earn50 + earn100 + earnHoliday + earnWeekend;
   const lateDeduction = rate * totalLateHours;
   const leaveDeduction = rate * totalLeaveHours;
   const totalDeduction = lateDeduction + leaveDeduction;
   const net = s.netSalary + totalOvertimeEarn - totalDeduction;
 
+  const fullLeaveDays = inMonth.filter((e) => e.status === "fullLeave").length;
+  const halfLeaveDays = inMonth.filter((e) => e.status === "halfLeave").length;
+  const sickDays = inMonth.filter((e) => e.status === "sick").length;
+  const holidayShiftDays = inMonth.filter(
+    (e) => e.status === "holiday" && (e.overtimeHoliday || 0) > 0,
+  ).length;
+  const weekendShiftDays = weekendEntries.filter(
+    (e) => (e.overtime50 || 0) + (e.overtime100 || 0) > 0,
+  ).length;
+
   return {
     total50Hours,
     total100Hours,
     totalHolidayHours,
+    totalWeekendHours,
     earn50,
     earn100,
     earnHoliday,
+    earnWeekend,
     totalOvertimeEarn,
     totalLateHours,
     totalLeaveHours,
     lateDeduction,
     leaveDeduction,
     totalDeduction,
+    fullLeaveDays,
+    halfLeaveDays,
+    sickDays,
+    holidayShiftDays,
+    weekendShiftDays,
     net,
   };
 }
