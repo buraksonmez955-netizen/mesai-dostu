@@ -116,7 +116,9 @@ function readEntries(): DayEntry[] {
   try {
     const raw = window.localStorage.getItem(ENTRIES_KEY);
     if (raw) {
-      const entries = migrateEntries(safeParse<unknown>(raw, {}));
+      const parsed = safeParse<unknown>(raw, null);
+      if (parsed === null) return [];
+      const entries = migrateEntries(parsed);
       window.localStorage.setItem(ENTRIES_KEY, JSON.stringify(entriesToRecord(entries)));
       return entries;
     }
@@ -137,10 +139,10 @@ function readSettings(): Settings {
   if (typeof window === "undefined") return defaultSettings;
   try {
     const raw = window.localStorage.getItem(SETTINGS_KEY);
-    if (raw) return { ...defaultSettings, ...safeParse<Partial<Settings>>(raw, {}) };
+    if (raw) return normalizeSettings({ ...defaultSettings, ...safeParse<Partial<Settings>>(raw, {}) });
     const legacy = window.localStorage.getItem(LEGACY_SETTINGS_KEY);
     if (legacy) {
-      const merged = { ...defaultSettings, ...safeParse<Partial<Settings>>(legacy, {}) };
+      const merged = normalizeSettings({ ...defaultSettings, ...safeParse<Partial<Settings>>(legacy, {}) });
       window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
       return merged;
     }
@@ -183,8 +185,9 @@ export function useSettings() {
   }, []);
 
   const save = useCallback((s: Settings) => {
-    writeJSON(SETTINGS_KEY, s);
-    setSettings(s);
+    const next = normalizeSettings(s);
+    writeJSON(SETTINGS_KEY, next);
+    setSettings(next);
   }, []);
 
   return { settings, save, loaded };
@@ -218,6 +221,19 @@ export function useEntries() {
     // Her zaman localStorage'dan oku — race condition'ı önle
     const current = readEntries();
     const cleanEntry = normalizeEntry(entry);
+    if (current.length === 0 && typeof window !== "undefined" && window.localStorage.getItem(ENTRIES_KEY)) {
+      const raw = window.localStorage.getItem(ENTRIES_KEY);
+      if (raw && safeParse<unknown>(raw, null) === null) {
+        setEntries((prev) => {
+          const next = [...prev.filter((e) => e.date !== cleanEntry.date), cleanEntry].sort((a, b) =>
+            a.date < b.date ? 1 : -1,
+          );
+          writeJSON(ENTRIES_KEY, entriesToRecord(next));
+          return next;
+        });
+        return;
+      }
+    }
     const idx = current.findIndex((e) => e.date === cleanEntry.date);
     let next: DayEntry[];
     if (idx >= 0) {
