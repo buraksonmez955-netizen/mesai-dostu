@@ -2,13 +2,13 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Settings, Calendar, PlusCircle, BarChart3, History } from "lucide-react";
 import type { ReactNode } from "react";
 
-const nav = [
+const nav: Array<{ to: string; label: string; icon: typeof Home; highlight?: boolean }> = [
   { to: "/", label: "Ana", icon: Home },
   { to: "/takvim", label: "Takvim", icon: Calendar },
   { to: "/gun-ekle", label: "Ekle", icon: PlusCircle, highlight: true },
   { to: "/rapor", label: "Rapor", icon: BarChart3 },
   { to: "/gecmis", label: "Geçmiş", icon: History },
-] as const;
+];
 
 export function AppLayout({ title, children, action }: { title: string; children: ReactNode; action?: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
