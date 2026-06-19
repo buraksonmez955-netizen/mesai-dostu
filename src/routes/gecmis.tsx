@@ -1,0 +1,103 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { AppLayout } from "@/components/AppLayout";
+import { useEntries, useSettings } from "@/lib/storage";
+import { formatHours, formatTRY, hourlyRate, MONTHS_TR, parseYMD } from "@/lib/mesai";
+import { useMemo } from "react";
+import { ChevronRight } from "lucide-react";
+
+export const Route = createFileRoute("/gecmis")({
+  head: () => ({ meta: [{ title: "Geçmiş Kayıtlar — Mesai Defteri" }] }),
+  component: HistoryPage,
+});
+
+function HistoryPage() {
+  const { entries } = useEntries();
+  const { settings } = useSettings();
+  const navigate = useNavigate();
+  const rate = hourlyRate(settings);
+
+  const groups = useMemo(() => {
+    const map = new Map<string, typeof entries>();
+    for (const e of entries) {
+      const d = parseYMD(e.date);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      const arr = map.get(key) ?? [];
+      arr.push(e);
+      map.set(key, arr);
+    }
+    return Array.from(map.entries())
+      .map(([k, list]) => {
+        const [y, m] = k.split("-").map(Number);
+        return {
+          y,
+          m,
+          list: list.sort((a, b) => (a.date < b.date ? 1 : -1)),
+        };
+      })
+      .sort((a, b) => (a.y !== b.y ? b.y - a.y : b.m - a.m));
+  }, [entries]);
+
+  if (entries.length === 0) {
+    return (
+      <AppLayout title="Geçmiş Kayıtlar">
+        <div className="card-gradient rounded-2xl p-8 text-center">
+          <p className="text-sm text-muted-foreground">Henüz kayıt yok.</p>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  return (
+    <AppLayout title="Geçmiş Kayıtlar">
+      <div className="space-y-5">
+        {groups.map((g) => (
+          <section key={`${g.y}-${g.m}`}>
+            <h2 className="mb-2 px-1 text-sm font-semibold text-muted-foreground">
+              {MONTHS_TR[g.m]} {g.y}
+            </h2>
+            <ul className="space-y-2">
+              {g.list.map((e) => {
+                const d = parseYMD(e.date);
+                const otEarn = rate * 1.5 * e.overtime50 + rate * 2 * e.overtime100;
+                const ded = rate * (e.lateHours + e.leaveHours);
+                const net = otEarn - ded;
+                return (
+                  <li key={e.date}>
+                    <button
+                      onClick={() => navigate({ to: "/gun-ekle", search: { date: e.date } })}
+                      className="card-gradient flex w-full items-center justify-between rounded-xl p-3 text-left transition active:scale-[0.99]"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold">
+                          {d.toLocaleDateString("tr-TR", {
+                            day: "2-digit",
+                            month: "short",
+                            weekday: "short",
+                          })}
+                        </p>
+                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                          {e.overtime50 > 0 && `%50 ${formatHours(e.overtime50)} `}
+                          {e.overtime100 > 0 && `%100 ${formatHours(e.overtime100)} `}
+                          {e.lateHours > 0 && `Geç ${formatHours(e.lateHours)} `}
+                          {e.leaveHours > 0 && `İzin ${formatHours(e.leaveHours)}`}
+                          {e.note && ` • ${e.note}`}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm font-semibold ${net >= 0 ? "text-success" : "text-destructive"}`}>
+                          {net >= 0 ? "+" : ""}
+                          {formatTRY(net)}
+                        </span>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </AppLayout>
+  );
+}
