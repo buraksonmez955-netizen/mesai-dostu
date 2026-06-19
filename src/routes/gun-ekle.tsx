@@ -214,21 +214,12 @@ function DayAddPage() {
 
         {!otAllowed ? (
           <div className="rounded-[20px] border border-border bg-muted/40 p-5 text-center text-sm text-muted-foreground">
-            {status === "fullLeave"
-              ? "Tam gün izinli olduğunuz için bu güne mesai veya kesinti eklenemez."
-              : "Raporlu gün — mesai veya kesinti eklenemez."}
+            İzinli gün — mesai veya kesinti eklenemez.
           </div>
         ) : (
           <>
             <div className="card-gradient rounded-[20px] pt-6 pb-6 px-5">
-              <Label className="mb-4 block">
-                Fazla Mesai
-                {status === "weekendOff" && (
-                  <span className="ml-2 text-xs font-normal text-muted-foreground">
-                    (Hafta tatili mesaisi)
-                  </span>
-                )}
-              </Label>
+              <Label className="mb-4 block">Fazla Mesai</Label>
               {status === "holiday" ? (
                 <div className="mb-5 rounded-xl border border-status-holiday bg-status-holiday/10 p-3 text-sm text-status-holiday">
                   Resmi Tatil Mesaisi — x {hMult} (%{holidayPct})
