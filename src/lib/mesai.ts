@@ -9,21 +9,12 @@ export type Settings = {
   holidayMultiplier: number;
 };
 
-export type DayStatus =
-  | "normal"
-  | "halfLeave"
-  | "fullLeave"
-  | "sick"
-  | "holiday"
-  | "weekendOff";
+export type DayStatus = "normal" | "holiday" | "leave";
 
 export const DAY_STATUS_LABEL: Record<DayStatus, string> = {
   normal: "Normal Çalışma",
-  halfLeave: "Yarım Gün İzin",
-  fullLeave: "Tam Gün İzin",
-  sick: "Raporlu",
   holiday: "Resmi Tatil",
-  weekendOff: "Hafta Tatili",
+  leave: "İzinli Gün",
 };
 
 export type DayEntry = {
