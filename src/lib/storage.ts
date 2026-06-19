@@ -176,8 +176,8 @@ function writeSettings(s: Settings) {
 }
 
 export function useSettings() {
-  const [settings, setSettings] = useState<Settings>(defaultSettings);
-  const [loaded, setLoaded] = useState(false);
+  const [settings, setSettings] = useState<Settings>(() => readSettings());
+  const [loaded, setLoaded] = useState<boolean>(() => typeof window !== "undefined");
 
   useEffect(() => {
     setSettings(readSettings());
@@ -207,8 +207,8 @@ export function useSettings() {
 }
 
 export function useEntries() {
-  const [entries, setEntries] = useState<DayEntry[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const [entries, setEntries] = useState<DayEntry[]>(() => readEntries());
+  const [loaded, setLoaded] = useState<boolean>(() => typeof window !== "undefined");
   const loadedRef = useRef(false);
 
   useEffect(() => {

@@ -31,7 +31,7 @@ export const Route = createFileRoute("/gecmis")({
 });
 
 function HistoryPage() {
-  const { entries } = useEntries();
+  const { entries, loaded } = useEntries();
   const { settings } = useSettings();
   const navigate = useNavigate();
   const rate = hourlyRate(settings);
@@ -57,6 +57,16 @@ function HistoryPage() {
       })
       .sort((a, b) => (a.y !== b.y ? b.y - a.y : b.m - a.m));
   }, [entries]);
+
+  if (!loaded) {
+    return (
+      <AppLayout title="Geçmiş Kayıtlar">
+        <div className="card-gradient rounded-2xl p-8 text-center">
+          <p className="text-sm text-muted-foreground">Kayıtlar yükleniyor...</p>
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (entries.length === 0) {
     return (

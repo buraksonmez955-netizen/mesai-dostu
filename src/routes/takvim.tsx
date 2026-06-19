@@ -19,7 +19,7 @@ const STATUS_DOT: Record<DayStatus, string> = {
 };
 
 function TakvimPage() {
-  const { entries } = useEntries();
+  const { entries, loaded } = useEntries();
   const navigate = useNavigate();
   const [month, setMonth] = useState<Date>(new Date());
 
@@ -134,7 +134,11 @@ function TakvimPage() {
       )}
 
       <h2 className="mb-2 px-1 text-sm font-semibold text-muted-foreground">Bu Ayki Kayıtlar</h2>
-      {entriesThisMonth.length === 0 ? (
+      {!loaded ? (
+        <p className="rounded-xl bg-muted p-4 text-center text-sm text-muted-foreground">
+          Kayıtlar yükleniyor...
+        </p>
+      ) : entriesThisMonth.length === 0 ? (
         <p className="rounded-xl bg-muted p-4 text-center text-sm text-muted-foreground">
           Bu ayda kayıt yok. Bir gün seç ve mesai ekle.
         </p>
