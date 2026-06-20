@@ -5,6 +5,8 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 
 export default defineConfig({
+  root: "mobile",
+  publicDir: "../public",
   plugins: [
     tanstackRouter({ target: "react", autoCodeSplitting: true }),
     tsConfigPaths({ projects: ["./tsconfig.json"] }),
@@ -12,10 +14,10 @@ export default defineConfig({
     react(),
   ],
   build: {
-    outDir: "dist/client",
+    outDir: "../dist/client",
     emptyOutDir: false,
     rollupOptions: {
-      input: "mobile/index.html",
+      input: "index.html",
     },
   },
 });
