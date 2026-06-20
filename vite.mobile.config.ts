@@ -15,7 +15,7 @@ export default defineConfig({
     outDir: "dist/client",
     emptyOutDir: false,
     rollupOptions: {
-      input: "index.mobile.html",
+      input: "mobile/index.html",
     },
   },
 });
