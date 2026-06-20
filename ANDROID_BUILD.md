@@ -29,10 +29,10 @@ Bu kılavuz, mevcut web uygulamasını **Capacitor** ile Android paketine (APK /
 
 ```bash
 npm install @capacitor/core @capacitor/cli @capacitor/android
-npx cap init "Mesai Defteri" "com.mesaidefteri.app" --web-dir=dist
+npx cap init "Mesai Defteri" "com.mesaidefteri.app" --web-dir=dist/client
 ```
 
-> `--web-dir=dist` Vite/TanStack Start build çıktısının klasörüdür.
+> `--web-dir=dist/client` TanStack Start istemci/static build çıktısının klasörüdür.
 
 Bu komut proje köküne `capacitor.config.ts` dosyası oluşturur. İçeriği şöyle görünmeli:
 
@@ -42,7 +42,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.mesaidefteri.app',
   appName: 'Mesai Defteri',
-  webDir: 'dist',
+  webDir: 'dist/client',
 };
 
 export default config;
@@ -56,7 +56,7 @@ export default config;
 npm run build
 ```
 
-> TanStack Start SSR çıktısı yerine statik istemci dosyalarına ihtiyacın var. Eğer `dist/` içinde `index.html` yoksa, `vite.config.ts`'e geçici olarak `ssr: false` modu eklemek ya da statik prerender yapmak gerekebilir. Build sonrası `dist/index.html` olduğunu doğrula.
+> Capacitor statik istemci dosyalarını kullanır. Build sonrası `dist/client/index.html` olduğunu doğrula.
 
 ---
 
@@ -204,7 +204,7 @@ Her yeni sürüm için:
 
 ## Sorun Giderme
 
-- **Beyaz ekran açılışta:** `capacitor.config.ts` içinde `webDir` doğru mu? `dist/index.html` var mı?
+- **Beyaz ekran açılışta:** `capacitor.config.ts` içinde `webDir` doğru mu? `dist/client/index.html` var mı?
 - **localStorage temizleniyor:** Capacitor WebView'da `localStorage` kalıcıdır. Eğer kullanıcı "Uygulama verisini sil" derse silinir — bu Android'in standart davranışıdır.
 - **Gradle sync hatası:** Android Studio → **File → Invalidate Caches / Restart**.
 - **`adb` bulunamadı:** `~/Library/Android/sdk/platform-tools` (Mac) veya `%LOCALAPPDATA%\Android\Sdk\platform-tools` (Windows) klasörünü PATH'e ekle.
