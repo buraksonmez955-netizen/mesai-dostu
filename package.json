@@ -5,8 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "npm run build:web && npm run build:mobile",
+    "build:web": "vite build",
+    "build:mobile": "vite build --config vite.mobile.config.ts",
     "build:dev": "vite build --mode development",
+    "cap:sync:android": "npm run build && npx cap sync android",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write ."
