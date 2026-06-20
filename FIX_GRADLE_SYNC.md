@@ -17,7 +17,7 @@ Bu yollar **proje kökündeki `node_modules` klasörüne** bağımlıdır. GitHu
 # 1. Bağımlılıkları kur (node_modules üretir)
 npm install
 
-# 2. Web build üret (dist/ klasörünü doldurur)
+# 2. Web build üret (dist/client klasörünü ve index.html dosyasını oluşturur)
 npm run build
 
 # 3. Capacitor sync — node_modules'ten gradle yollarını yeniden bağlar
@@ -47,8 +47,8 @@ JDK 21 gerekli (Capacitor 7 + AGP 8.13 ile). Android Studio → **Settings → B
 ### "Failed to resolve org.apache.cordova:framework"
 İnternet bağlantısı veya proxy/firewall maven central'a erişimi engelliyor. Şirket ağındaysan VPN dene.
 
-### `dist/` boş veya `index.html` yok
-TanStack Start build çıktısı doğru üretilmemiş demektir. `npm run build` çıktısını kontrol et; `dist/index.html` dosyası olmalı. Yoksa, build script'i kontrol et — Capacitor düz statik dosyalara ihtiyaç duyar.
+### `dist/client/` boş veya `index.html` yok
+Mobil statik build çıktısı doğru üretilmemiş demektir. `npm run build` çıktısını kontrol et; `dist/client/index.html` dosyası olmalı. Sadece mobil çıktıyı yenilemek için `npm run build:mobile` çalıştırabilirsin — Capacitor düz statik dosyalara ihtiyaç duyar.
 
 ### Her şeyi sıfırla
 ```bash
