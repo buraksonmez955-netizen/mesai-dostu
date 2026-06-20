@@ -58,6 +58,12 @@ npm run build
 
 > Capacitor statik istemci dosyalarını kullanır. Build sonrası `dist/client/index.html` olduğunu doğrula.
 
+Sadece Android/Capacitor için statik SPA çıktısını yenilemek istersen:
+
+```bash
+npm run build:mobile
+```
+
 ---
 
 ## 4. Android platformunu ekle
@@ -197,7 +203,7 @@ cd android
 
 Her yeni sürüm için:
 1. `android/app/build.gradle` içinde `versionCode` (1 → 2 → 3 …) ve `versionName` (`1.0.0` → `1.0.1`) artır.
-2. `npm run build && npx cap sync android`
+2. `npm run build && npx cap sync android` veya tek komutla `npm run cap:sync:android`
 3. AAB'yi yeniden üret ve Play Console'a yükle.
 
 ---
