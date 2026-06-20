@@ -11,15 +11,5 @@ export default defineConfig({
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
-    // Capacitor needs a static SPA shell in the client output directory.
-    // This makes `npm run build` emit `dist/client/index.html` while keeping
-    // the normal TanStack Start server build intact for web deployment.
-    spa: {
-      enabled: true,
-      prerender: {
-        outputPath: "index.html",
-        crawlLinks: false,
-      },
-    },
   },
 });
