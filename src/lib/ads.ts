@@ -55,7 +55,8 @@ export async function showBanner(): Promise<void> {
       adId: ADMOB_IDS.banner,
       adSize: BannerAdSize.ADAPTIVE_BANNER,
       position: BannerAdPosition.BOTTOM_CENTER,
-      margin: 0,
+      // Banner alt navigasyon barının üstüne binmesin (~72dp nav yüksekliği)
+      margin: 72,
       isTesting: false,
     });
     bannerShown = true;
