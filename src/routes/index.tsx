@@ -104,6 +104,9 @@ function HomePage() {
           <p className="text-xs text-muted-foreground">Tüm detaylar</p>
         </Link>
       </div>
+      {/* Banner reklam alanı için ekstra boşluk — alt nav ve içeriği örtmesin */}
+      <div aria-hidden className="h-16" />
+      <AdBanner />
     </AppLayout>
   );
 }
