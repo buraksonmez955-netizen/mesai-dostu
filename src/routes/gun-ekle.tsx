@@ -17,6 +17,7 @@ import {
   type DayStatus,
 } from "@/lib/mesai";
 import { getHoliday } from "@/lib/holidays";
+import { maybeShowInterstitial } from "@/lib/ads";
 import { toast } from "sonner";
 import { Trash2, Save, Sparkles, Briefcase, Sun, Calendar as CalIcon } from "lucide-react";
 
@@ -137,6 +138,8 @@ function DayAddPage() {
       note,
     });
     toast.success("Kayıt eklendi");
+    // Geçiş reklamı (15dk throttling, bekletmez)
+    void maybeShowInterstitial();
     navigate({ to: "/takvim" });
   };
 

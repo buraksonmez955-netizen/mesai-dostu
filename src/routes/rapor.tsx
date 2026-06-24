@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppLayout } from "@/components/AppLayout";
 import { useEntries, useSettings } from "@/lib/storage";
 import { formatHours, formatTRY, hourlyRate, MONTHS_TR, summarizeMonth } from "@/lib/mesai";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { maybeShowInterstitial } from "@/lib/ads";
 
 export const Route = createFileRoute("/rapor")({
   head: () => ({ meta: [{ title: "Aylık Rapor — Mesai Defteri" }] }),
@@ -17,6 +18,12 @@ function ReportPage() {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
+
+  // Rapor açılırken geçiş reklamı (15dk throttling, bekletmez)
+  useEffect(() => {
+    void maybeShowInterstitial();
+  }, []);
+
 
   const summary = useMemo(
     () => summarizeMonth(entries, settings, year, month),
