@@ -13,7 +13,7 @@ const nav: Array<{ to: string; label: string; icon: typeof Home; highlight?: boo
 export function AppLayout({ title, children, action }: { title: string; children: ReactNode; action?: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-[calc(7rem+env(safe-area-inset-bottom))]">
       <header className="primary-gradient sticky top-0 z-10 px-5 pt-6 pb-5 shadow-[var(--shadow-elevated)]">
         <div className="mx-auto flex max-w-md items-center justify-between gap-3">
           <div>
@@ -33,8 +33,12 @@ export function AppLayout({ title, children, action }: { title: string; children
 
       <main className="mx-auto max-w-md px-4 py-5">{children}</main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-card/95 backdrop-blur">
-        <div className="mx-auto flex max-w-md items-end justify-between px-2 py-2">
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-card/95 backdrop-blur"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        <div className="mx-auto flex max-w-md items-end justify-between px-2 pt-2 pb-2">
+
           {nav.map(({ to, label, icon: Icon, highlight }) => {
             const active = pathname === to;
             const toAny = to as never;
