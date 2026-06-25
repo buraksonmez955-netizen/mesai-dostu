@@ -6,8 +6,9 @@ export function SplashScreen() {
   const [fading, setFading] = useState(false);
 
   useEffect(() => {
-    const fadeTimer = setTimeout(() => setFading(true), 1400);
-    const hideTimer = setTimeout(() => setVisible(false), 1900);
+    // En az 2 sn görünür kalsın, ardından 600ms yumuşak fade ile kaybolsun.
+    const fadeTimer = setTimeout(() => setFading(true), 2000);
+    const hideTimer = setTimeout(() => setVisible(false), 2600);
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(hideTimer);
@@ -19,7 +20,7 @@ export function SplashScreen() {
   return (
     <div
       aria-hidden
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center primary-gradient transition-opacity duration-500 ${
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center primary-gradient transition-opacity duration-700 ease-out ${
         fading ? "opacity-0" : "opacity-100"
       }`}
     >

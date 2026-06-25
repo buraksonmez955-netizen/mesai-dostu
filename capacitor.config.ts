@@ -19,6 +19,11 @@ const config: CapacitorConfig = {
       splashFullScreen: true,
       splashImmersive: true,
     },
+    // Klavye açıldığında WebView'i yeniden boyutlandır — input alanları görünür kalır, sayfa donmaz.
+    Keyboard: {
+      resize: 'native',
+      resizeOnFullScreen: true,
+    },
   },
 };
 
