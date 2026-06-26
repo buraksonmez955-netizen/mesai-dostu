@@ -131,7 +131,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <SplashScreen />
+      {/* Splash native tarafta yönetiliyor */}
       <Outlet />
       <Toaster position="top-center" richColors />
     </QueryClientProvider>
