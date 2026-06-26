@@ -8,8 +8,8 @@
 	},
 	"plugins": {
 		"SplashScreen": {
-			"launchShowDuration": 1500,
-			"launchAutoHide": true,
+			"launchShowDuration": 2000,
+			"launchAutoHide": false,
 			"backgroundColor": "#0f172a",
 			"androidSplashResourceName": "splash",
 			"androidScaleType": "CENTER_CROP",
@@ -18,7 +18,7 @@
 			"splashImmersive": true
 		},
 		"Keyboard": {
-			"resize": "native",
+			"resize": "body",
 			"resizeOnFullScreen": true
 		}
 	}

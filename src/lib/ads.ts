@@ -8,6 +8,16 @@ export const ADMOB_IDS = {
   interstitial: "ca-app-pub-9985326646469445/8101699915",
 };
 
+// Google'ın resmi test ID'leri — dahili testte fill rate %100, gerçek reklam yüklenmese
+// bile görünür. Production'a geçince AD_TESTING=false yap.
+const AD_TESTING = true;
+const TEST_IDS = {
+  banner: "ca-app-pub-3940256099942544/6300978111",
+  interstitial: "ca-app-pub-3940256099942544/1033173712",
+};
+const BANNER_ID = AD_TESTING ? TEST_IDS.banner : ADMOB_IDS.banner;
+const INTERSTITIAL_ID = AD_TESTING ? TEST_IDS.interstitial : ADMOB_IDS.interstitial;
+
 const INTERSTITIAL_MIN_INTERVAL_MS = 15 * 60 * 1000; // 15 dakika
 const LAST_INTERSTITIAL_KEY = "mesai.lastInterstitialAt";
 
@@ -33,9 +43,11 @@ async function ensureInit(): Promise<boolean> {
     try {
       const { AdMob } = await import("@capacitor-community/admob");
       await AdMob.initialize({
-        initializeForTesting: false,
+        initializeForTesting: AD_TESTING,
+        testingDevices: [],
       });
       initialized = true;
+      console.log("[ads] AdMob initialized (testing=" + AD_TESTING + ")");
     } catch (err) {
       console.warn("[ads] init failed", err);
     }
@@ -47,19 +59,22 @@ async function ensureInit(): Promise<boolean> {
 let bannerShown = false;
 
 export async function showBanner(): Promise<void> {
-  if (!(await ensureInit())) return;
+  if (!(await ensureInit())) {
+    console.log("[ads] showBanner skipped — not native or init failed");
+    return;
+  }
   if (bannerShown) return;
   try {
     const { AdMob, BannerAdPosition, BannerAdSize } = await import("@capacitor-community/admob");
     await AdMob.showBanner({
-      adId: ADMOB_IDS.banner,
+      adId: BANNER_ID,
       adSize: BannerAdSize.ADAPTIVE_BANNER,
       position: BannerAdPosition.BOTTOM_CENTER,
-      // Banner alt navigasyon barının üstüne binmesin (~72dp nav yüksekliği)
-      margin: 72,
-      isTesting: false,
+      margin: 0,
+      isTesting: AD_TESTING,
     });
     bannerShown = true;
+    console.log("[ads] banner shown");
   } catch (err) {
     console.warn("[ads] showBanner failed", err);
   }
@@ -97,32 +112,26 @@ function setLastInterstitialAt(ts: number) {
   }
 }
 
-/**
- * Geçiş reklamı göster. 15 dakika throttling uygulanır.
- * Reklam yüklenmemişse veya hata olursa sessizce çıkar — kullanıcıyı bekletmez.
- */
 export async function maybeShowInterstitial(): Promise<void> {
   if (!isNative()) return;
   const now = Date.now();
   const last = getLastInterstitialAt();
   if (now - last < INTERSTITIAL_MIN_INTERVAL_MS) return;
 
-  // Optimistic: zamanı şimdi işaretle ki paralel tetiklemeler iki kez göstermesin.
   setLastInterstitialAt(now);
 
-  // Arka planda göster — await beklemeden çağırana hemen dön.
   void (async () => {
     try {
       const ok = await ensureInit();
       if (!ok) return;
       const { AdMob } = await import("@capacitor-community/admob");
       await AdMob.prepareInterstitial({
-        adId: ADMOB_IDS.interstitial,
-        isTesting: false,
+        adId: INTERSTITIAL_ID,
+        isTesting: AD_TESTING,
       });
       await AdMob.showInterstitial();
+      console.log("[ads] interstitial shown");
     } catch (err) {
-      // Reklam yüklenmediyse zamanı geri al ki bir sonraki denemeyi engellemesin.
       setLastInterstitialAt(last);
       console.warn("[ads] interstitial failed", err);
     }

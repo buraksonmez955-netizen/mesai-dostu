@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
-import { SplashScreen } from "@/components/SplashScreen";
+// React splash kaldırıldı — native Capacitor SplashScreen tek kaynak (main.tsx içinde 2 sn sonra hide).
 
 function NotFoundComponent() {
   return (
@@ -131,7 +131,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <SplashScreen />
+      {/* Splash native tarafta yönetiliyor */}
       <Outlet />
       <Toaster position="top-center" richColors />
     </QueryClientProvider>
