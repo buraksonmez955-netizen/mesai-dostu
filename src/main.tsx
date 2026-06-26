@@ -18,3 +18,18 @@ createRoot(rootElement).render(
     <RouterProvider router={router} />
   </StrictMode>,
 );
+
+// Native splash screen'i sadece uygulama ilk açıldığında, garantili 2 sn sonra gizle.
+// Sayfa geçişlerinde tetiklenmez — bu sadece dosya yüklendiğinde bir kez çalışır.
+(async () => {
+  try {
+    const { Capacitor } = await import("@capacitor/core");
+    if (!Capacitor.isNativePlatform()) return;
+    const { SplashScreen } = await import("@capacitor/splash-screen");
+    // En az 2 sn ekranda kalsın
+    await new Promise((r) => setTimeout(r, 2000));
+    await SplashScreen.hide({ fadeOutDuration: 300 });
+  } catch (err) {
+    console.warn("[splash] hide failed", err);
+  }
+})();
