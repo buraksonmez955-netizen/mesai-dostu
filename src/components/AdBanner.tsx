@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { showBanner, hideBanner } from "@/lib/ads";
+import { showBanner } from "@/lib/ads";
 
 /**
  * Native AdMob banner'ı gösterir. Web'de hiçbir şey yapmaz.
@@ -7,10 +7,7 @@ import { showBanner, hideBanner } from "@/lib/ads";
  */
 export function AdBanner() {
   useEffect(() => {
-    showBanner();
-    return () => {
-      hideBanner();
-    };
+    void showBanner();
   }, []);
   return null;
 }

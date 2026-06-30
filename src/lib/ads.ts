@@ -20,6 +20,7 @@ const INTERSTITIAL_ID = AD_TESTING ? TEST_IDS.interstitial : ADMOB_IDS.interstit
 
 const INTERSTITIAL_MIN_INTERVAL_MS = 15 * 60 * 1000; // 15 dakika
 const LAST_INTERSTITIAL_KEY = "mesai.lastInterstitialAt";
+const BANNER_BOTTOM_MARGIN = 72;
 
 function isNative(): boolean {
   try {
@@ -31,6 +32,26 @@ function isNative(): boolean {
 
 let initialized = false;
 let initPromise: Promise<void> | null = null;
+let listenersReady = false;
+
+function setBannerHeight(height: number) {
+  if (typeof document === "undefined") return;
+  document.documentElement.style.setProperty("--ad-banner-height", `${Math.max(0, height)}px`);
+}
+
+async function installBannerListeners() {
+  if (listenersReady) return;
+  listenersReady = true;
+
+  const { AdMob, BannerAdPluginEvents } = await import("@capacitor-community/admob");
+  await AdMob.addListener(BannerAdPluginEvents.SizeChanged, (size) => {
+    setBannerHeight(size.height || 0);
+  });
+  await AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (error) => {
+    setBannerHeight(0);
+    console.warn("[ads] Banner yüklenemedi", error);
+  });
+}
 
 async function ensureInit(): Promise<boolean> {
   if (!isNative()) return false;
@@ -46,10 +67,10 @@ async function ensureInit(): Promise<boolean> {
         initializeForTesting: AD_TESTING,
         testingDevices: [],
       });
+      await installBannerListeners();
       initialized = true;
-      console.log("[ads] AdMob initialized (testing=" + AD_TESTING + ")");
     } catch (err) {
-      console.warn("[ads] init failed", err);
+      console.warn("[ads] AdMob başlatılamadı", err);
     }
   })();
   await initPromise;
@@ -60,7 +81,6 @@ let bannerShown = false;
 
 export async function showBanner(): Promise<void> {
   if (!(await ensureInit())) {
-    console.log("[ads] showBanner skipped — not native or init failed");
     return;
   }
   if (bannerShown) return;
@@ -70,13 +90,13 @@ export async function showBanner(): Promise<void> {
       adId: BANNER_ID,
       adSize: BannerAdSize.ADAPTIVE_BANNER,
       position: BannerAdPosition.BOTTOM_CENTER,
-      margin: 0,
+      margin: BANNER_BOTTOM_MARGIN,
       isTesting: AD_TESTING,
     });
     bannerShown = true;
-    console.log("[ads] banner shown");
   } catch (err) {
-    console.warn("[ads] showBanner failed", err);
+    setBannerHeight(0);
+    console.warn("[ads] Banner gösterilemedi", err);
   }
 }
 
@@ -87,8 +107,9 @@ export async function hideBanner(): Promise<void> {
     await AdMob.hideBanner();
     await AdMob.removeBanner();
     bannerShown = false;
+    setBannerHeight(0);
   } catch (err) {
-    console.warn("[ads] hideBanner failed", err);
+    console.warn("[ads] Banner kaldırılamadı", err);
   }
 }
 
@@ -130,10 +151,9 @@ export async function maybeShowInterstitial(): Promise<void> {
         isTesting: AD_TESTING,
       });
       await AdMob.showInterstitial();
-      console.log("[ads] interstitial shown");
     } catch (err) {
       setLastInterstitialAt(last);
-      console.warn("[ads] interstitial failed", err);
+      console.warn("[ads] Geçiş reklamı gösterilemedi", err);
     }
   })();
 }

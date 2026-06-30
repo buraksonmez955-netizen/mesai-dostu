@@ -24,16 +24,19 @@ function SettingsPage() {
   const [dailyHours, setDailyHours] = useState("");
   const [monthlyHoursStr, setMonthlyHoursStr] = useState("");
   const [holidayMult, setHolidayMult] = useState("");
+  const [draftReady, setDraftReady] = useState(false);
 
   useEffect(() => {
-    if (loaded) {
-      setNetSalary(settings.netSalary ? String(settings.netSalary) : "");
-      setWeeklyHours(String(settings.weeklyHours));
-      setDailyHours(String(settings.dailyHours));
-      setMonthlyHoursStr(String(settings.monthlyHours || 225));
-      setHolidayMult(String(settings.holidayMultiplier ?? 2));
-    }
-  }, [loaded, settings]);
+    if (!loaded || draftReady) return;
+    setNetSalary(settings.netSalary ? String(settings.netSalary) : "");
+    setWeeklyHours(String(settings.weeklyHours));
+    setDailyHours(String(settings.dailyHours));
+    setMonthlyHoursStr(String(settings.monthlyHours || 225));
+    setHolidayMult(String(settings.holidayMultiplier ?? 2));
+    setDraftReady(true);
+  }, [draftReady, loaded, settings]);
+
+  const normalizeDecimal = (v: string) => v.trim().replace(",", ".");
 
   const parsed = {
     netSalary: Number(netSalary.replace(",", ".")) || 0,
@@ -66,6 +69,7 @@ function SettingsPage() {
             placeholder="Örn. 30000"
             value={netSalary}
             onChange={(e) => setNetSalary(e.target.value)}
+            onBlur={(e) => setNetSalary(normalizeDecimal(e.target.value))}
             className="mt-2 h-12 text-lg"
           />
         </div>
@@ -78,6 +82,7 @@ function SettingsPage() {
             placeholder="45"
             value={weeklyHours}
             onChange={(e) => setWeeklyHours(e.target.value)}
+            onBlur={(e) => setWeeklyHours(normalizeDecimal(e.target.value))}
             className="mt-2 h-12 text-lg"
           />
           <p className="mt-2 text-xs text-muted-foreground">
@@ -93,6 +98,7 @@ function SettingsPage() {
             placeholder="9"
             value={dailyHours}
             onChange={(e) => setDailyHours(e.target.value)}
+            onBlur={(e) => setDailyHours(normalizeDecimal(e.target.value))}
             className="mt-2 h-12 text-lg"
           />
         </div>
@@ -105,6 +111,7 @@ function SettingsPage() {
             placeholder="225"
             value={monthlyHoursStr}
             onChange={(e) => setMonthlyHoursStr(e.target.value)}
+            onBlur={(e) => setMonthlyHoursStr(normalizeDecimal(e.target.value))}
             className="mt-2 h-12 text-lg"
           />
           <p className="mt-2 text-xs text-muted-foreground">
@@ -122,6 +129,7 @@ function SettingsPage() {
             placeholder="2"
             value={holidayMult}
             onChange={(e) => setHolidayMult(e.target.value)}
+            onBlur={(e) => setHolidayMult(normalizeDecimal(e.target.value))}
             className="mt-2 h-12 text-lg"
           />
           <p className="mt-2 text-xs text-muted-foreground">
