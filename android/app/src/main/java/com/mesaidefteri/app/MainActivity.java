@@ -2,23 +2,33 @@ package com.mesaidefteri.app;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.View;
+
+import androidx.core.view.WindowCompat;
 
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        configureWindowForAndroidWebView();
         super.onCreate(savedInstanceState);
+        configureWindowForAndroidWebView();
+    }
 
-        // Android 15 (API 35) ile edge-to-edge default. WebView'i sistem barlarının
-        // altına itmemek için decor'u system insets'lere göre boyutlandır.
+    private void configureWindowForAndroidWebView() {
+        Window window = getWindow();
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        WindowCompat.setDecorFitsSystemWindows(window, true);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            getWindow().setDecorFitsSystemWindows(true);
+            window.setDecorFitsSystemWindows(true);
         }
-        // Eski Android'lerde de SYSTEM_UI_FLAG_LAYOUT_STABLE kapalı kalsın ki
-        // alt navigasyon (Android gesture/nav bar) WebView içeriğini ezmesin.
-        View decor = getWindow().getDecorView();
+        View decor = window.getDecorView();
         decor.setSystemUiVisibility(decor.getSystemUiVisibility()
                 & ~View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 & ~View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION

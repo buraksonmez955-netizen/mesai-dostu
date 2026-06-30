@@ -159,7 +159,7 @@ function DayAddPage() {
 
   const holidayPct = Math.round((hMult - 1) * 100);
 
-  const normalizeDecimal = (v: string) => v.replace(",", ".");
+  const normalizeDecimal = (v: string) => v.trim().replace(",", ".");
 
   return (
     <AppLayout title="Günlük Kayıt">
@@ -260,7 +260,8 @@ function DayAddPage() {
                 pattern="[0-9.,]*"
                 placeholder="Mesai Saati (örn: 2.5)"
                 value={otHours}
-                onChange={(e) => setOtHours(normalizeDecimal(e.target.value))}
+                onChange={(e) => setOtHours(e.target.value)}
+                onBlur={(e) => setOtHours(normalizeDecimal(e.target.value))}
                 className="h-12"
               />
             </div>
@@ -276,7 +277,8 @@ function DayAddPage() {
                   pattern="[0-9.,]*"
                   placeholder="0"
                   value={lateHours}
-                  onChange={(e) => setLateHours(normalizeDecimal(e.target.value))}
+                  onChange={(e) => setLateHours(e.target.value)}
+                  onBlur={(e) => setLateHours(normalizeDecimal(e.target.value))}
                   className="mt-2 h-12"
                 />
               </div>
@@ -290,7 +292,8 @@ function DayAddPage() {
                   pattern="[0-9.,]*"
                   placeholder="0"
                   value={leaveHours}
-                  onChange={(e) => setLeaveHours(normalizeDecimal(e.target.value))}
+                  onChange={(e) => setLeaveHours(e.target.value)}
+                  onBlur={(e) => setLeaveHours(normalizeDecimal(e.target.value))}
                   className="mt-2 h-12"
                 />
               </div>

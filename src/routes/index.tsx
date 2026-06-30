@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { AppLayout } from "@/components/AppLayout";
-import { AdBanner } from "@/components/AdBanner";
 import { useEntries, useSettings } from "@/lib/storage";
 import { formatTRY, hourlyRate, summarizeMonth, MONTHS_TR, formatHours } from "@/lib/mesai";
 import { ArrowRight, Clock, TrendingUp, Wallet, Calendar as CalendarIcon } from "lucide-react";
@@ -104,9 +103,6 @@ function HomePage() {
           <p className="text-xs text-muted-foreground">Tüm detaylar</p>
         </Link>
       </div>
-      {/* Banner reklam alanı için ekstra boşluk — alt nav ve içeriği örtmesin */}
-      <div aria-hidden className="h-16" />
-      <AdBanner />
     </AppLayout>
   );
 }

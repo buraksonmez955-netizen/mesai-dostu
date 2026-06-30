@@ -10,21 +10,19 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      // Native splash 2 sn görünür kalır; React tarafında ayrı bir splash yok.
-      launchShowDuration: 2000,
-      launchAutoHide: false, // main.tsx içinde manuel hide() ile garanti süre.
+      launchShowDuration: 1300,
+      launchAutoHide: false,
+      launchFadeOutDuration: 180,
       backgroundColor: '#0f172a',
       androidSplashResourceName: 'splash',
       androidScaleType: 'CENTER_CROP',
       showSpinner: false,
-      splashFullScreen: true,
-      splashImmersive: true,
+      splashFullScreen: false,
+      splashImmersive: false,
     },
-    // 'native' mode bazı Android 13/14 WebView'lerinde input focus'unu kilitliyor.
-    // 'body' modu sayfa gövdesini yeniden boyutlandırır, sayfa donmaz.
     Keyboard: {
-      resize: 'body',
-      resizeOnFullScreen: true,
+      resize: 'native',
+      resizeOnFullScreen: false,
     },
   },
 };
